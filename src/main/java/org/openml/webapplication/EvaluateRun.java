@@ -127,7 +127,8 @@ public class EvaluateRun {
 				trace = traceToXML(runFiles.get("trace").getFileId(), task_id, runId);
 			}
 			String description_url = apiconnector.getOpenmlFileUrl(runFiles.get("description").getFileId(), "Run_" + runId + "_description.xml").toString();
-			String description = HttpConnector.getStringFromUrl(new URL(description_url), false);
+			File runDescriptionFile = HttpConnector.getFileFromUrl(new URL(description_url), false, "xml");
+			String description = Conversion.fileToString(runDescriptionFile);
 			
 			Run run_description = (Run) xstream.fromXML(description);
 			dataset = apiconnector.dataGet(dataset_id);
@@ -136,10 +137,6 @@ public class EvaluateRun {
 			
 			String filename_prefix = "Run_" + runId + "_";
 			URL datasetUrl = apiconnector.getOpenmlFileUrl(dataset.getFile_id(), dataset.getName());
-			if (dataset.getFile_id() == null) {
-				// TODO: fallback mechanism for datasets without file reference. Do something better. 
-				datasetUrl = new URL(dataset.getUrl());
-			}
 			
 			if( task.getTask_type_id() == 4) { // Supervised Data Stream Classification
 				URL predictionsUrl = apiconnector.getOpenmlFileUrl(runFiles.get("predictions").getFileId(), filename_prefix + "predictions.arff");
