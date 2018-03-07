@@ -33,7 +33,6 @@ import org.openml.webapplication.evaluate.EvaluateStreamPredictions;
 import org.openml.webapplication.evaluate.EvaluateSubgroups;
 import org.openml.webapplication.evaluate.EvaluateSurvivalAnalysisPredictions;
 import org.openml.webapplication.evaluate.PredictionEvaluator;
-import org.openml.webapplication.generatefolds.EstimationProcedure;
 import org.openml.webapplication.settings.Settings;
 
 import weka.core.Instance;
@@ -151,11 +150,9 @@ public class EvaluateRun {
 				predictionEvaluator = new EvaluateStreamChallenge(apiconnector, runId);
 			} else {
 				predictionEvaluator = new EvaluateBatchPredictions( 
+					apiconnector,
 					task,
-					datasetUrl, 
-					estimationprocedure.getData_splits_url(), 
-					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"), 
-					estimationprocedure.getType().equals(EstimationProcedure.estimationProceduresTxt[6] ) );
+					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
 			}
 			runevaluation.addEvaluationMeasures(predictionEvaluator.getEvaluationScores());
 			

@@ -30,10 +30,14 @@ import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.MathHelper;
 import org.openml.apiconnector.algorithms.TaskInformation;
+import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.models.MetricScore;
+import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Task;
+import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.webapplication.algorithm.InstancesHelper;
+import org.openml.webapplication.generatefolds.EstimationProcedure;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
@@ -66,15 +70,26 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private EvaluationScore[] evaluationScores;
 
-	public EvaluateBatchPredictions(Task task, URL datasetPath, URL splitsPath, URL predictionsPath, boolean bootstrap) throws Exception {
+	public EvaluateBatchPredictions(OpenmlConnector openml, Task task, URL predictionsPath) throws Exception {
+		final int datasetId = TaskInformation.getSourceData(task).getData_set_id();
+		DataSetDescription dsd = openml.dataGet(datasetId);
+		
 		// set all arff files needed for this operation.
+		URL datasetPath = openml.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName());
 		Conversion.log("OK", "EvaluateBatchPredictions", "dataset url: " + datasetPath);
+		dataset = new Instances(new BufferedReader(Input.getURL(datasetPath))); 
+		// TODO: we could use openml.getFileFromURL for more robust arff handling
+		
+		URL splitsPath = TaskInformation.getEstimationProcedure(task).getData_splits_url();
 		Conversion.log("OK", "EvaluateBatchPredictions", "splits url : " + splitsPath);
-		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsPath);
-		dataset = new Instances(new BufferedReader(Input.getURL(datasetPath)));
-		predictions = new Instances(new BufferedReader(Input.getURL(predictionsPath)));
 		splits = new Instances(new BufferedReader(Input.getURL(splitsPath)));
-		this.bootstrap = bootstrap;
+		// TODO: we could use openml.getFileFromURL for more robust
+		
+		predictions = new Instances(new BufferedReader(Input.getURL(predictionsPath)));
+		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsPath);
+		
+		Estimation_procedure estimationprocedure = TaskInformation.getEstimationProcedure(task);
+		this.bootstrap = estimationprocedure.getType().equals(EstimationProcedure.estimationProceduresTxt[6] );
 		String classAttribute = TaskInformation.getSourceData(task).getTarget_feature();
 		cost_matrix = TaskInformation.getCostMatrix(task);
 
