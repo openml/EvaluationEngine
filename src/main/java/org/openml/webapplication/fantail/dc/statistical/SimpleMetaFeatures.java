@@ -61,9 +61,9 @@ public class SimpleMetaFeatures extends Characterizer {
 						NumberOfBinaryFeatures++;
 				}
 			}
-			PercentageOfNumericFeatures = (NumberOfFeatures > 0 ? NumberOfNumericFeatures / NumberOfFeatures : null);
-			PercentageOfSymbolicFeatures = (NumberOfFeatures > 0 ? NumberOfSymbolicFeatures / NumberOfFeatures : null);
-			PercentageOfBinaryFeatures = (NumberOfFeatures > 0 ? NumberOfBinaryFeatures / NumberOfFeatures : null);
+			PercentageOfNumericFeatures = (NumberOfFeatures > 0 ? NumberOfNumericFeatures / NumberOfFeatures * 100 : null); 
+			PercentageOfSymbolicFeatures = (NumberOfFeatures > 0 ? NumberOfSymbolicFeatures / NumberOfFeatures * 100 : null);
+			PercentageOfBinaryFeatures = (NumberOfFeatures > 0 ? NumberOfBinaryFeatures / NumberOfFeatures * 100 : null);
 
 			// MissingValues
 			NumberOfMissingValues = 0.0;
@@ -79,8 +79,8 @@ public class SimpleMetaFeatures extends Characterizer {
 				if (currentInstance.hasMissingValue())
 					NumberOfInstancesWithMissingValues++;
 			}
-			PercentageOfInstancesWithMissingValues = (NumberOfInstances > 0 ? NumberOfInstancesWithMissingValues / NumberOfInstances : null);
-			PercentageOfMissingValues = (NumberOfFeatures * NumberOfInstances > 0 ? NumberOfMissingValues / (NumberOfFeatures * NumberOfInstances) : null);
+			PercentageOfInstancesWithMissingValues = (NumberOfInstances > 0 ? NumberOfInstancesWithMissingValues / NumberOfInstances * 100 : null);
+			PercentageOfMissingValues = (NumberOfFeatures * NumberOfInstances > 0 ? NumberOfMissingValues / (NumberOfFeatures * NumberOfInstances) * 100 : null);
 
 			// AutoCorrelation
 			double TimeBasedChanges = 0.0;
@@ -121,8 +121,8 @@ public class SimpleMetaFeatures extends Characterizer {
 					}
 				}
 				NumberOfClasses = (double) ValuesCounts.size();
-				MajorityClassPercentage = (NumberOfInstances > 0 ? MajorityClassSize / NumberOfInstances : null);
-				MinorityClassPercentage = (NumberOfInstances > 0 ? MinorityClassSize / NumberOfInstances : null);
+				MajorityClassPercentage = (NumberOfInstances > 0 ? MajorityClassSize / NumberOfInstances * 100 : null);
+				MinorityClassPercentage = (NumberOfInstances > 0 ? MinorityClassSize / NumberOfInstances * 100 : null);
 
 			} catch (Exception e) {
 				NumberOfClasses = null;

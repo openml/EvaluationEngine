@@ -65,6 +65,7 @@ public class Main {
 		options.addOption("tag", true, "A tag that will get priority in processing fantail features. " );
 		options.addOption("mode", true, "{train,test}" );
 		options.addOption("size", true, "Desired size of train/test set" );
+		options.addOption("v", false, "Flag determining whether to have verbose output");
 		
 		try {
 			CommandLine cli  = parser.parse(options, args);
@@ -80,6 +81,10 @@ public class Main {
 				apiconnector = new OpenmlConnector(config.getServer(),config.getApiKey());
 			} else {
 				apiconnector = new OpenmlConnector(config.getApiKey());
+			}
+			
+			if (cli.hasOption("v")) {
+				apiconnector.setVerboseLevel(1);
 			}
 			
 			if( cli.hasOption("-id") ) {

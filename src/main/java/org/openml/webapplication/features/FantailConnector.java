@@ -58,11 +58,11 @@ public class FantailConnector {
 			computeMetafeatures(dataset_id);
 
 		} else {
-			DataUnprocessed du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds());
+			DataUnprocessed du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds(), priorityTag);
 			while (du != null) {
 				Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " as obtained from database. ");
 				computeMetafeatures(du.getDatasets()[0].getDid());
-				du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds());
+				du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds(), priorityTag);
 			}
 			Conversion.log("OK", "Process Dataset", "No more datasets to process. ");
 		}
