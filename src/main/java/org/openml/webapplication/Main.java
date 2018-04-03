@@ -269,6 +269,7 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println( Output.styleToJsonError(e.getMessage() ));
+			System.exit(1);
 		}
 		
 		// makes sure the system halts, even when cortana is executed
