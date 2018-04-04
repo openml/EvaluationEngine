@@ -174,7 +174,7 @@ public class EvaluateRun {
 								if( recorded.sameValue( calculated ) == false ) {
 									String offByStr = "";
 									try {
-										double diff = Math.abs( Double.parseDouble( recorded.getValue() ) - Double.parseDouble( calculated.getValue() ) );
+										double diff = Math.abs(recorded.getValue() - calculated.getValue());
 										offByStr = " (off by " + diff + ")";
 									} catch( NumberFormatException nfe ) { }
 									
