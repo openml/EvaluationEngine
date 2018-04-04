@@ -197,10 +197,10 @@ public class EvaluateRun {
 			} else {
 				Conversion.log( "OK", "Process Run", "No local evaluation measures to compare to. " );
 			}
-		} catch( Exception e ) {
+		} catch(Exception e) {
 			e.printStackTrace();
 			Conversion.log( "Warning", "Process Run", "Unexpected error, will proceed with upload process: " + e.getMessage() );
-			runevaluation.setError( e.getMessage(), MAX_LENGTH_WARNING );
+			runevaluation.setError(e, MAX_LENGTH_WARNING);
 		}
 
 		

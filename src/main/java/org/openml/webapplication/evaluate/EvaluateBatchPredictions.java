@@ -279,10 +279,15 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 				DecimalFormat dm = MathHelper.defaultDecimalFormat;
 				Double calculated_score = score.getScore() == null ? null : score.getScore();
 				
-				Double[] individualVals = tmpFoldEvaluations.get(math_function).toArray(new Double[tmpFoldEvaluations.size()]);
+				Double stdev = null;
+				if (tmpFoldEvaluations.containsKey(math_function)) {
+					Double[] individualVals = tmpFoldEvaluations.get(math_function).toArray(new Double[tmpFoldEvaluations.get(math_function).size()]);
+					stdev = stdevCalculator.evaluate(ArrayUtils.toPrimitive(individualVals));
+				}
+				
 				EvaluationScore em = new EvaluationScore(math_function,
 						calculated_score, 
-						stdevCalculator.evaluate(ArrayUtils.toPrimitive(individualVals)),
+						stdev,
 						score.getArrayAsString(dm));
 				evaluationMeasuresList.add(em);
 			}
