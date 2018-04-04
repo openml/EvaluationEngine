@@ -145,8 +145,8 @@ public class EvaluateSubgroups implements PredictionEvaluator {
 		print("ROC AUC      : " + Double.toString(auroc));
 		print("hull points  : " + r.size());
 		
-		EvaluationScore je = new EvaluationScore("joint_entropy", Double.toString(jointEntropy), null, null);
-		EvaluationScore auroc10 = new EvaluationScore("pattern_team_auroc10", Double.toString(auroc), null, null);
+		EvaluationScore je = new EvaluationScore("joint_entropy", jointEntropy, null, null);
+		EvaluationScore auroc10 = new EvaluationScore("pattern_team_auroc10", auroc, null, null);
 		List<EvaluationScore> evals = Evaluations.extract(subgroupsCsv, this.evaluation_measure);
 		
 		evals.add(je);

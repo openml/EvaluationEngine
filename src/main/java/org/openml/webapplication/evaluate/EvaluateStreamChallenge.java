@@ -195,7 +195,7 @@ public class EvaluateStreamChallenge implements PredictionEvaluator {
 			evaluationMeasures.add( 
 				new EvaluationScore( 
 					math_function, 
-					score.getScore() == null ? null : dm.format( score.getScore() ), 
+					score.getScore() == null ? null : score.getScore(), 
 					null, 
 					score.getArrayAsString( dm ) ) );
 		}
