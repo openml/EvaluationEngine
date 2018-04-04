@@ -23,9 +23,12 @@ import java.io.BufferedReader;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.MathHelper;
@@ -158,15 +161,15 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private void doEvaluation() throws Exception {
 		// set global evaluation
-		Evaluation[] e = new Evaluation[bootstrap ? 2 : 1];
+		Evaluation[] globalEvaluator = new Evaluation[bootstrap ? 2 : 1];
 
-		for (int i = 0; i < e.length; ++i) {
-			e[i] = new Evaluation(dataset);
+		for (int i = 0; i < globalEvaluator.length; ++i) {
+			globalEvaluator[i] = new Evaluation(dataset);
 			if (cost_matrix != null) {
 				// TODO test
-				e[i] = new Evaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
+				globalEvaluator[i] = new Evaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
 			} else {
-				e[i] = new Evaluation(dataset);
+				globalEvaluator[i] = new Evaluation(dataset);
 			}
 		}
 
@@ -209,7 +212,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 			if (taskType == TaskType.REGRESSION) {
 				if (measureGlobalScore) {
-					e[bootstrap].evaluateModelOnce(prediction.value(ATT_PREDICTION_PREDICTION),
+					globalEvaluator[bootstrap].evaluateModelOnce(prediction.value(ATT_PREDICTION_PREDICTION),
 							dataset.instance(rowid));
 				}
 				sampleEvaluation[repeat][fold][sample][bootstrap].evaluateModelOnce(prediction.value(ATT_PREDICTION_PREDICTION), dataset.instance(rowid));
@@ -218,7 +221,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 				double[] confidences = InstancesHelper.predictionToConfidences(dataset, prediction, ATT_PREDICTION_CONFIDENCE, ATT_PREDICTION_PREDICTION);
 
 				if (measureGlobalScore) {
-					e[bootstrap].evaluateModelOnceAndRecordPrediction(confidences, dataset.instance(rowid));
+					globalEvaluator[bootstrap].evaluateModelOnceAndRecordPrediction(confidences, dataset.instance(rowid));
 				}
 				sampleEvaluation[repeat][fold][sample][bootstrap].evaluateModelOnceAndRecordPrediction(confidences, dataset.instance(rowid));
 			}
@@ -227,21 +230,9 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		if (predictionCounter.check() == false) {
 			throw new RuntimeException("Prediction count does not match: " + predictionCounter.getErrorMessage());
 		}
-
+		
 		List<EvaluationScore> evaluationMeasuresList = new ArrayList<EvaluationScore>();
-		Map<String, MetricScore> globalMeasures = Output.evaluatorToMap(e, nrOfClasses, taskType, bootstrap);
-		for (String math_function : globalMeasures.keySet()) {
-			MetricScore score = globalMeasures.get(math_function);
-			// preventing divisions by zero and infinite scores (given by Weka)
-			if (score.getScore() != null && score.getScore().isNaN() == false && score.getScore().isInfinite() == false) { 
-				DecimalFormat dm = MathHelper.defaultDecimalFormat;
-				EvaluationScore em = new EvaluationScore(math_function,
-						score.getScore() == null ? null : dm.format(score.getScore()), null,
-						score.getArrayAsString(dm));
-				evaluationMeasuresList.add(em);
-
-			}
-		}
+		Map<String, List<Double>> tmpFoldEvaluations = new HashMap<String, List<Double>>();
 		for (int i = 0; i < sampleEvaluation.length; ++i) {
 			for (int j = 0; j < sampleEvaluation[i].length; ++j) {
 				for (int k = 0; k < sampleEvaluation[i][j].length; ++k) {
@@ -253,21 +244,47 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 						if (score.getScore() != null && score.getScore().isNaN() == false && score.getScore().isInfinite() == false) { 
 							DecimalFormat dm = MathHelper.defaultDecimalFormat;
 							EvaluationScore currentMeasure;
-
+							
+							Double currentScore = score.getScore() == null ? null : score.getScore();
 							if (taskType == TaskType.LEARNINGCURVE) {
 								currentMeasure = new EvaluationScore(math_function,
-										score.getScore() == null ? null : dm.format(score.getScore()),
-										score.getArrayAsString(dm), i, j, k,
-										predictionCounter.getShadowTypeSize(i, j, k));
+									currentScore,
+									score.getArrayAsString(dm), i, j, k,
+									predictionCounter.getShadowTypeSize(i, j, k));
 							} else {
 								currentMeasure = new EvaluationScore(math_function,
-										score.getScore() == null ? null : dm.format(score.getScore()),
-										score.getArrayAsString(dm), i, j);
+									currentScore,
+									score.getArrayAsString(dm), i, j);
 							}
 							evaluationMeasuresList.add(currentMeasure);
+							
+							if (currentScore != null && k == sampleEvaluation[i][j].length - 1) {
+								if (!tmpFoldEvaluations.containsKey(math_function)) {
+									tmpFoldEvaluations.put(math_function, new ArrayList<>());
+								}
+								tmpFoldEvaluations.get(math_function).add(currentScore);
+							}
 						}
 					}
 				}
+			}
+		}
+		
+		StandardDeviation stdevCalculator = new StandardDeviation();
+		Map<String, MetricScore> globalMeasures = Output.evaluatorToMap(globalEvaluator, nrOfClasses, taskType, bootstrap);
+		for (String math_function : globalMeasures.keySet()) {
+			MetricScore score = globalMeasures.get(math_function);
+			// preventing divisions by zero and infinite scores (given by Weka)
+			if (score.getScore() != null && score.getScore().isNaN() == false && score.getScore().isInfinite() == false) { 
+				DecimalFormat dm = MathHelper.defaultDecimalFormat;
+				Double calculated_score = score.getScore() == null ? null : score.getScore();
+				
+				Double[] individualVals = tmpFoldEvaluations.get(math_function).toArray(new Double[tmpFoldEvaluations.size()]);
+				EvaluationScore em = new EvaluationScore(math_function,
+						calculated_score, 
+						stdevCalculator.evaluate(ArrayUtils.toPrimitive(individualVals)),
+						score.getArrayAsString(dm));
+				evaluationMeasuresList.add(em);
 			}
 		}
 		evaluationScores = evaluationMeasuresList.toArray(new EvaluationScore[evaluationMeasuresList.size()]);
