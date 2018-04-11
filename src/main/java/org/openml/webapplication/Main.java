@@ -58,6 +58,7 @@ public class Main {
 		options.addOption("f", true, "The function to invole");
 		options.addOption("o", true, "The output file / offset");
 		options.addOption("r", true, "The run id");
+		options.addOption("reverse", false, "whether to start evaluating last runs");
 		options.addOption("t", true, "The task id");
 		options.addOption("x", false, "Flag determining whether we should pick a random id");
 		options.addOption("m", false, "Flag determining whether the output of the splits file should be presented as a md5 hash");
@@ -98,6 +99,9 @@ public class Main {
 					Integer ttid = cli.hasOption("-mode") ? Integer.parseInt(cli.getOptionValue("mode")) : null;
 					Integer uploaderId = cli.hasOption("-u") ? Integer.parseInt(cli.getOptionValue("u")) : null;
 					String evaluationMode = cli.hasOption("x") ? "random" : "normal";
+					if (cli.hasOption("-reverse")) {
+						evaluationMode = "reverse";
+					}
 					String taskIds = cli.hasOption("t") ? cli.getOptionValue("t") : null;
 					
 					// bootstrap evaluate run
