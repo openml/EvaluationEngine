@@ -28,9 +28,7 @@ import org.openml.apiconnector.xml.Task.Input.Data_set;
 import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.evaluate.EvaluateBatchPredictions;
-import org.openml.webapplication.evaluate.EvaluateStreamChallenge;
 import org.openml.webapplication.evaluate.EvaluateStreamPredictions;
-import org.openml.webapplication.evaluate.EvaluateSubgroups;
 import org.openml.webapplication.evaluate.EvaluateSurvivalAnalysisPredictions;
 import org.openml.webapplication.evaluate.PredictionEvaluator;
 import org.openml.webapplication.settings.Settings;
@@ -144,10 +142,6 @@ public class EvaluateRun {
 				URL predictionsUrl = apiconnector.getOpenmlFileUrl(runFiles.get("predictions").getFileId(), filename_prefix + "predictions.arff");
 				URL splitsUrl = estimationprocedure.getData_splits_url();
 				predictionEvaluator = new EvaluateSurvivalAnalysisPredictions(task, datasetUrl, splitsUrl, predictionsUrl);
-			} else if (task.getTask_type_id() == 8) { // Subgroup Discovery
-				predictionEvaluator = new EvaluateSubgroups(runId, apiconnector);
-			} else if (task.getTask_type_id() == 9) { // Stream Challenge
-				predictionEvaluator = new EvaluateStreamChallenge(apiconnector, runId);
 			} else {
 				predictionEvaluator = new EvaluateBatchPredictions( 
 					apiconnector,
