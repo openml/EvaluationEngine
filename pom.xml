@@ -45,16 +45,16 @@
       <version>1.0.14</version>
     </dependency>
     
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-cli</artifactId>
-      <version>1.2</version>
+    <dependency> <!-- TODO JvR: remove/replace this one!-->
+      <groupId>org.mod4j.org.apache.commons</groupId>
+      <artifactId>cli</artifactId>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>
       <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math</artifactId>
-      <version>3.3.4</version>
+      <artifactId>commons-math3</artifactId>
+      <version>3.6.1</version>
     </dependency>
     
   
