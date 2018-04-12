@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class EvaluateRun {
 		this(ac, null, "normal", null, null, null, null);
 	}
 	
-	public EvaluateRun(OpenmlConnector ac, Integer run_id, String mode, Integer ttid, String taskIds, String tag, Integer uploaderId) throws Exception {
+	public EvaluateRun(OpenmlConnector ac, Integer run_id, String evaluationMode, int[] ttids, String taskIds, String tag, Integer uploaderId) throws Exception {
 		apiconnector = ac;
 		xstream = XstreamXmlMapping.getInstance();
 		if(run_id != null) {
@@ -56,8 +57,9 @@ public class EvaluateRun {
 			try {
 				// while loop will be broken when when there are no runs left on server (catch)
 				Map<String, String> filters = new TreeMap<>();
-				if (ttid != null) {
-					filters.put("ttid", "" + ttid);
+				if (ttids != null) {
+					String ttidString = Arrays.toString(ttids).replaceAll(" ", "").replaceAll("\\[", "").replaceAll("\\]", "");
+					filters.put("ttid", ttidString);
 				}
 				if (taskIds != null) {
 					filters.put("task", taskIds);
@@ -70,7 +72,7 @@ public class EvaluateRun {
 				}
 				
 				while(true) {
-					EvaluationRequest er = ac.evaluationRequest(1, mode, filters);
+					EvaluationRequest er = ac.evaluationRequest(1, evaluationMode, filters);
 					run_id = er.getRuns()[0].getRun_id();
 					Conversion.log("INFO","Evaluate Run","Downloading task " + run_id );
 					evaluate( run_id );

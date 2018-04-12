@@ -45,6 +45,8 @@ public class Main {
 	
 	public static final int FOLD_GENERATION_SEED = 0;
 	
+	public static final int[] TASK_TYPE_IDS = {1, 2, 3, 4, 5, 6, 7};
+	
 	public static void main( String[] args ) {
 		OpenmlConnector apiconnector;
 		CommandLineParser parser = new GnuParser();
@@ -96,7 +98,11 @@ public class Main {
 				
 				String function = cli.getOptionValue("f");
 				if( function.equals("evaluate_run") ) {
-					Integer ttid = cli.hasOption("-mode") ? Integer.parseInt(cli.getOptionValue("mode")) : null;
+					int[] ttids = TASK_TYPE_IDS;
+					if (cli.hasOption("-mode")) {
+						ttids = new int[1];
+						ttids[0] = Integer.parseInt(cli.getOptionValue("mode"));
+					}
 					Integer uploaderId = cli.hasOption("-u") ? Integer.parseInt(cli.getOptionValue("u")) : null;
 					String evaluationMode = cli.hasOption("x") ? "random" : "normal";
 					if (cli.hasOption("-reverse")) {
@@ -105,7 +111,7 @@ public class Main {
 					String taskIds = cli.hasOption("t") ? cli.getOptionValue("t") : null;
 					
 					// bootstrap evaluate run
-					new EvaluateRun(apiconnector, id, evaluationMode, ttid, taskIds, cli.getOptionValue("tag"), uploaderId);
+					new EvaluateRun(apiconnector, id, evaluationMode, ttids, taskIds, cli.getOptionValue("tag"), uploaderId);
 					
 				} else if( function.equals("process_dataset") ) {
 					
