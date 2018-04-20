@@ -72,7 +72,7 @@ public class Main {
 		
 		try {
 			CommandLine cli  = parser.parse(options, args);
-			if( cli.hasOption("-config") == false ) {
+			if( cli.hasOption("config") == false ) {
 				config = new Config();
 			} else {
 				config = new Config(cli.getOptionValue("config"));
@@ -90,7 +90,7 @@ public class Main {
 				apiconnector.setVerboseLevel(1);
 			}
 			
-			if( cli.hasOption("-id") ) {
+			if( cli.hasOption("id") ) {
 				id = Integer.parseInt(cli.getOptionValue("id"));
 			}
 			
@@ -99,13 +99,13 @@ public class Main {
 				String function = cli.getOptionValue("f");
 				if( function.equals("evaluate_run") ) {
 					int[] ttids = TASK_TYPE_IDS;
-					if (cli.hasOption("-mode")) {
+					if (cli.hasOption("mode")) {
 						ttids = new int[1];
 						ttids[0] = Integer.parseInt(cli.getOptionValue("mode"));
 					}
-					Integer uploaderId = cli.hasOption("-u") ? Integer.parseInt(cli.getOptionValue("u")) : null;
+					Integer uploaderId = cli.hasOption("u") ? Integer.parseInt(cli.getOptionValue("u")) : null;
 					String evaluationMode = cli.hasOption("x") ? "random" : "normal";
-					if (cli.hasOption("-reverse")) {
+					if (cli.hasOption("reverse")) {
 						evaluationMode = "reverse";
 					}
 					String taskIds = cli.hasOption("t") ? cli.getOptionValue("t") : null;
@@ -114,8 +114,6 @@ public class Main {
 					new EvaluateRun(apiconnector, id, evaluationMode, ttids, taskIds, cli.getOptionValue("tag"), uploaderId);
 					
 				} else if( function.equals("process_dataset") ) {
-					
-					
 					// bootstrap process dataset
 					String processMode = cli.hasOption("x") ? "random" : "normal";
 					new ProcessDataset(apiconnector, id, processMode);
@@ -134,7 +132,7 @@ public class Main {
 					String datasetName;
 					
 					
-					if(cli.hasOption("-id")) {
+					if(cli.hasOption("id")) {
 						id = Integer.parseInt(cli.getOptionValue("id"));
 						Task current = apiconnector.taskGet(id);
 						Map<String, String> inputs = apiconnector.taskInputs(id).getInputsAsMap();
@@ -211,7 +209,7 @@ public class Main {
 					
 				} else if(function.equals("all_wrong")) {
 					
-					if(cli.hasOption("-r") && cli.hasOption("-t")) {
+					if(cli.hasOption("r") && cli.hasOption("t")) {
 						
 						String[] run_ids_splitted = cli.getOptionValue("r").split(",");
 						Integer task_id = Integer.parseInt(cli.getOptionValue("t"));
@@ -231,7 +229,7 @@ public class Main {
 					
 				} else if(function.equals("different_predictions")) {
 					
-					if( cli.hasOption("-r") && cli.hasOption("-t") ) {
+					if( cli.hasOption("r") && cli.hasOption("t") ) {
 						
 						String[] run_ids_splitted = cli.getOptionValue("r").split(",");
 						Integer task_id = Integer.parseInt(cli.getOptionValue("t"));
@@ -255,10 +253,10 @@ public class Main {
 					Integer offset = null;
 					Integer size = null;
 					
-					if (cli.hasOption("-o")) {
+					if (cli.hasOption("o")) {
 						offset = Integer.parseInt(cli.getOptionValue("o"));
 						
-						if (cli.hasOption("-size")) {
+						if (cli.hasOption("size")) {
 							size = Integer.parseInt(cli.getOptionValue("size"));
 						}
 					}
