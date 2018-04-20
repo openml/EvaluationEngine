@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.14</version>
+      <version>1.0.19</version>
     </dependency>
     
     <dependency> <!-- TODO JvR: remove/replace this one!-->
