@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONArray;
+
 import weka.classifiers.CostMatrix;
 import weka.core.Utils;
 import weka.core.Instance;
@@ -123,11 +125,12 @@ public class InstancesHelper {
 		return result;
 	}
 	
-	public static CostMatrix doubleToCostMatrix( double[][] cm ) {
-		CostMatrix costmatrix = new CostMatrix(cm.length);
-		for( int i = 0; i < cm.length; ++i ) {
-			for( int j = 0; j < cm[i].length; ++j ) {
-				costmatrix.setElement( i, j, cm[i][j]);
+	public static CostMatrix doubleToCostMatrix(JSONArray cm) {
+		CostMatrix costmatrix = new CostMatrix(cm.length());
+		for( int i = 0; i < cm.length(); ++i ) {
+			JSONArray subArray = cm.getJSONArray(i);
+			for( int j = 0; j < subArray.length(); ++j ) {
+				costmatrix.setElement(i, j, subArray.getDouble(j));
 			}
 		}
 		return costmatrix;

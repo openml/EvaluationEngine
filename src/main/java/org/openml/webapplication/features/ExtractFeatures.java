@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataQuality.Quality;
@@ -59,6 +60,7 @@ public class ExtractFeatures {
 			}
 			
 			String data_type = null;
+			JSONArray nominal_values = null;
 			
 			Integer numberOfDistinctValues = null;
 			Integer numberOfUniqueValues = null;
@@ -100,17 +102,25 @@ public class ExtractFeatures {
 				}
 			}
 			
-			if(att.type() == 0) {
+			if (att.type() == Attribute.NUMERIC) {
 				data_type = "numeric";
-			} else if(att.type() == 1) {
+			} else if (att.type() == Attribute.NOMINAL) {
 				data_type = "nominal";
-			} else if(att.type() == 2) {
+				List<String> values = new ArrayList<>();
+				for (int j = 0; j < att.numValues(); ++j) {
+					values.add(att.value(j));
+				}
+				nominal_values = new JSONArray(values);
+			} else if (att.type() == Attribute.STRING) {
 				data_type = "string";
+			} else if (att.type() == Attribute.DATE) {
+				data_type = "date";
 			} else {
 				data_type = "unknown";
 			}
 			
-			resultFeatures.add(new Feature(att.index(), att.name(), data_type,
+			resultFeatures.add(new Feature(att.index(), att.name(), 
+					data_type, nominal_values.toString(),
 					att.index() == dataset.classIndex(), 
 					numberOfDistinctValues,
 					numberOfUniqueValues, numberOfMissingValues,

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.json.JSONArray;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.MathHelper;
@@ -67,7 +68,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 	private final PredictionCounter predictionCounter;
 	private final String[] classes;
 	private final TaskType taskType;
-	private final double[][] cost_matrix;
+	private final JSONArray cost_matrix;
 	private final Evaluation[][][][] sampleEvaluation;
 	private final boolean bootstrap;
 
