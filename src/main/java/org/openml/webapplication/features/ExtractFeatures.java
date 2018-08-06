@@ -60,7 +60,7 @@ public class ExtractFeatures {
 			}
 			
 			String data_type = null;
-			JSONArray nominal_values = null;
+			String nominal_values = null;
 			
 			Integer numberOfDistinctValues = null;
 			Integer numberOfUniqueValues = null;
@@ -110,7 +110,7 @@ public class ExtractFeatures {
 				for (int j = 0; j < att.numValues(); ++j) {
 					values.add(att.value(j));
 				}
-				nominal_values = new JSONArray(values);
+				nominal_values = new JSONArray(values).toString();
 			} else if (att.type() == Attribute.STRING) {
 				data_type = "string";
 			} else if (att.type() == Attribute.DATE) {
@@ -120,7 +120,7 @@ public class ExtractFeatures {
 			}
 			
 			resultFeatures.add(new Feature(att.index(), att.name(), 
-					data_type, nominal_values.toString(),
+					data_type, nominal_values,
 					att.index() == dataset.classIndex(), 
 					numberOfDistinctValues,
 					numberOfUniqueValues, numberOfMissingValues,
