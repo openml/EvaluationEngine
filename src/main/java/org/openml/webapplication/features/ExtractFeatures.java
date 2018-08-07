@@ -37,7 +37,10 @@ import weka.core.Instances;
 
 public class ExtractFeatures {
 	
-	public static List<Feature> getFeatures(Instances dataset, String defaultClass) {
+	private static final int MAX_SIZE_CLASS_DISTR = 16384;
+	private static final int MAX_SIZE_NOMINAL_VALUES = 524288;
+	
+	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
 		if (defaultClass != null) {
 			if(defaultClass.contains(",")){
 				dataset.setClass(dataset.attribute(defaultClass.split(",")[0]));
@@ -111,6 +114,9 @@ public class ExtractFeatures {
 					values.add(att.value(j));
 				}
 				nominal_values = new JSONArray(values).toString();
+				if (nominal_values.length() > MAX_SIZE_NOMINAL_VALUES) {
+					throw new Exception("Nominal values length exceeds max allowed size with " + nominal_values.length() + " for feature: " + att.name());
+				}
 			} else if (att.type() == Attribute.STRING) {
 				data_type = "string";
 			} else if (att.type() == Attribute.DATE) {
@@ -118,7 +124,10 @@ public class ExtractFeatures {
 			} else {
 				data_type = "unknown";
 			}
-			
+			String classDistr = attributeStats.getClassDistribution();
+			if (classDistr.length() > MAX_SIZE_CLASS_DISTR) {
+				classDistr = null;
+			}
 			resultFeatures.add(new Feature(att.index(), att.name(), 
 					data_type, nominal_values,
 					att.index() == dataset.classIndex(), 
@@ -127,7 +136,7 @@ public class ExtractFeatures {
 					numberOfIntegerValues, numberOfRealValues,
 					numberOfNominalValues, numberOfValues,
 					maximumValue, minimumValue, meanValue,
-					standardDeviation, attributeStats.getClassDistribution()));
+					standardDeviation, classDistr));
 		}
 		return resultFeatures;
 	}
