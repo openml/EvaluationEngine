@@ -196,7 +196,7 @@ public class EvaluateRun {
 		} catch(Exception e) {
 			e.printStackTrace();
 			Conversion.log( "Warning", "Process Run", "Unexpected error, will proceed with upload process: " + e.getMessage() );
-			runevaluation.setError(e, MAX_LENGTH_WARNING);
+			runevaluation.setError(e.getMessage(), MAX_LENGTH_WARNING);
 		}
 
 		
