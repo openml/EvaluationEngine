@@ -37,8 +37,8 @@ import weka.core.Instances;
 
 public class ExtractFeatures {
 	
-	private static final int MAX_SIZE_CLASS_DISTR = 16384;
-	private static final int MAX_SIZE_NOMINAL_VALUES = 524288;
+	public static final int MAX_SIZE_CLASS_DISTR = 16384;
+	public static final int MAX_SIZE_NOMINAL_VALUES = 524288;
 	
 	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
 		if (defaultClass != null) {
@@ -115,7 +115,8 @@ public class ExtractFeatures {
 				}
 				nominal_values = new JSONArray(values).toString();
 				if (nominal_values.length() > MAX_SIZE_NOMINAL_VALUES) {
-					throw new Exception("Nominal values length exceeds max allowed size with " + nominal_values.length() + " for feature: " + att.name());
+					nominal_values = null;
+					//throw new Exception("Nominal values length exceeds max allowed size with " + nominal_values.length() + " for feature: " + att.name());
 				}
 			} else if (att.type() == Attribute.STRING) {
 				data_type = "string";

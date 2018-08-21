@@ -3,6 +3,7 @@ package org.openml.webapplication;
 import java.io.BufferedReader;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openml.apiconnector.algorithms.Conversion;
@@ -51,6 +52,16 @@ public class ProcessDataset {
 		}
 	}
 	
+	public List<String> nominalInComplete(List<Feature> features) {
+		List<String> nominalIncomplete = new ArrayList<String>();
+		for (Feature f : features) {
+			if(f.getDataType().equals("nominal") && f.getNominalValues() == null) {
+				nominalIncomplete.add(f.getName());
+			}
+		}
+		return nominalIncomplete;
+	}
+	
 	public void process(Integer did) throws Exception {
 
 		DataSetDescription dsd = apiconnector.dataGet(did);
@@ -64,12 +75,19 @@ public class ProcessDataset {
 			List<Quality> qualities = ExtractFeatures.getQualities(dataset,defaultTarget);
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. " );
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]) );
-			File dataFeatureFile = Conversion.stringToTempFile( xstream.toXML(datafeature), "features-did" + did, "xml");
+			String dataFeatureError = null;
+			List<String> nominalIncomplete = nominalInComplete(features);
+			if (nominalIncomplete.size() > 0) {
+				dataFeatureError = "\"Nominal values length exceeds max allowed size (" + ExtractFeatures.MAX_SIZE_NOMINAL_VALUES + 
+								   ") for feature(s): " + nominalIncomplete.toString();
+			}
+			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]), dataFeatureError);
+			
+			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
 			apiconnector.dataFeaturesUpload(dataFeatureFile);
 			
 			DataQuality dataquality = new DataQuality(did, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]) );
-			File dataQualityFile = Conversion.stringToTempFile( xstream.toXML(dataquality), "qualities-did" + did, "xml");
+			File dataQualityFile = Conversion.stringToTempFile(xstream.toXML(dataquality), "qualities-did" + did, "xml");
 			apiconnector.dataQualitiesUpload(dataQualityFile);
 			
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
