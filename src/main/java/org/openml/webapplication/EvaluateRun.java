@@ -36,6 +36,7 @@ import org.openml.webapplication.settings.Settings;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -261,7 +262,9 @@ public class EvaluateRun {
 			Map<String,String> parameters = new HashMap<String, String>();
 			for (int j = 0; j < parameterIndexes.size(); ++j) {
 				int attIdx = parameterIndexes.get(j);
-				if (traceDataset.attribute(attIdx).isNumeric()) {
+				if (Utils.isMissingValue(current.value(attIdx))) {
+					continue;
+				} else if (traceDataset.attribute(attIdx).isNumeric()) {
 					parameters.put(traceDataset.attribute(attIdx).name(),current.value(attIdx) + "");
 				} else {
 					parameters.put(traceDataset.attribute(attIdx).name(),current.stringValue(attIdx));
