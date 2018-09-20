@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataQuality.Quality;
@@ -63,7 +62,7 @@ public class ExtractFeatures {
 			}
 			
 			String data_type = null;
-			String nominal_values = null;
+			List<String> nominal_values = new ArrayList<>();
 			
 			Integer numberOfDistinctValues = null;
 			Integer numberOfUniqueValues = null;
@@ -109,14 +108,8 @@ public class ExtractFeatures {
 				data_type = "numeric";
 			} else if (att.type() == Attribute.NOMINAL) {
 				data_type = "nominal";
-				List<String> values = new ArrayList<>();
 				for (int j = 0; j < att.numValues(); ++j) {
-					values.add(att.value(j));
-				}
-				nominal_values = new JSONArray(values).toString();
-				if (nominal_values.length() > MAX_SIZE_NOMINAL_VALUES) {
-					nominal_values = null;
-					//throw new Exception("Nominal values length exceeds max allowed size with " + nominal_values.length() + " for feature: " + att.name());
+					nominal_values.add(att.value(j));
 				}
 			} else if (att.type() == Attribute.STRING) {
 				data_type = "string";
@@ -130,7 +123,7 @@ public class ExtractFeatures {
 				classDistr = null;
 			}
 			resultFeatures.add(new Feature(att.index(), att.name(), 
-					data_type, nominal_values,
+					data_type, nominal_values.toArray(new String[nominal_values.size()]),
 					att.index() == dataset.classIndex(), 
 					numberOfDistinctValues,
 					numberOfUniqueValues, numberOfMissingValues,
