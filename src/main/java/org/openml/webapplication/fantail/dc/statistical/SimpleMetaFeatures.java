@@ -99,31 +99,38 @@ public class SimpleMetaFeatures extends Characterizer {
 				AutoCorrelation = null;
 			}
 
-			// Class propoerties
-			try {
-				MajorityClassSize = Double.MIN_VALUE;
-				MinorityClassSize = Double.MAX_VALUE;
-				HashMap<Double, Integer> ValuesCounts = new HashMap<Double, Integer>();
-				for (int i = 0; i < dataset.numInstances(); i++) {
-					double value = dataset.get(i).classValue();
-					if (ValuesCounts.containsKey(value)) {
-						ValuesCounts.replace(value, ValuesCounts.get(value) + 1);
-					} else {
-						ValuesCounts.put(value, 1);
+			// Class properties
+			try {   // If target attribute is defined as numeric, use appropriate values
+				if (dataset.attribute(dataset.classIndex).type() == Attribute.NUMERIC) {
+					NumberOfClasses = 0;
+					MajorityClassSize = null;
+					MinorityClassSize = null;
+					MajorityClassPercentage = null;
+					MinorityClassPercentage = null;
+				} else {
+					MajorityClassSize = Double.MIN_VALUE;
+					MinorityClassSize = Double.MAX_VALUE;
+					HashMap<Double, Integer> ValuesCounts = new HashMap<Double, Integer>();
+					for (int i = 0; i < dataset.numInstances(); i++) {
+						double value = dataset.get(i).classValue();
+						if (ValuesCounts.containsKey(value)) {
+							ValuesCounts.replace(value, ValuesCounts.get(value) + 1);
+						} else {
+							ValuesCounts.put(value, 1);
+						}
 					}
+					for (Integer count : ValuesCounts.values()) {
+						if (count > MajorityClassSize) {
+							MajorityClassSize = (double) count;
+						}
+						if (count < MinorityClassSize) {
+							MinorityClassSize = (double) count;
+						}
+					}
+					NumberOfClasses = (double) ValuesCounts.size();
+					MajorityClassPercentage = (NumberOfInstances > 0 ? MajorityClassSize / NumberOfInstances * 100 : null);
+					MinorityClassPercentage = (NumberOfInstances > 0 ? MinorityClassSize / NumberOfInstances * 100 : null);
 				}
-				for (Integer count : ValuesCounts.values()) {
-					if (count > MajorityClassSize) {
-						MajorityClassSize = (double) count;
-					}
-					if (count < MinorityClassSize) {
-						MinorityClassSize = (double) count;
-					}
-				}
-				NumberOfClasses = (double) ValuesCounts.size();
-				MajorityClassPercentage = (NumberOfInstances > 0 ? MajorityClassSize / NumberOfInstances * 100 : null);
-				MinorityClassPercentage = (NumberOfInstances > 0 ? MinorityClassSize / NumberOfInstances * 100 : null);
-
 			} catch (Exception e) {
 				NumberOfClasses = null;
 				MajorityClassSize = null;
