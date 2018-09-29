@@ -36,6 +36,6 @@ public class TestFantail {
 
 		// Check the produced class count
 		Map<String,Double> metafeatures = simpleMetaFeatures.characterize(artificialData);
-		assertSame(metafeatures.get("NumberOfClasses"),0.0);
+		assertEquals(metafeatures.get("NumberOfClasses"),new Double(0.0));
 	}
 }

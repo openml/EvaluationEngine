@@ -101,8 +101,8 @@ public class SimpleMetaFeatures extends Characterizer {
 
 			// Class properties
 			try {   // If target attribute is defined as numeric, use appropriate values
-				if (dataset.attribute(dataset.classIndex).type() == Attribute.NUMERIC) {
-					NumberOfClasses = 0;
+				if (dataset.attribute(dataset.classIndex()).type() == Attribute.NUMERIC) {
+					NumberOfClasses = 0.0;
 					MajorityClassSize = null;
 					MinorityClassSize = null;
 					MajorityClassPercentage = null;
