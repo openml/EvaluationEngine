@@ -23,36 +23,51 @@ public class GlobalMetafeatures {
     private int expectedQualities;
     private ArrayList<String> expectedIds = new ArrayList<>();
 
-    public GlobalMetafeatures(Integer window_size) throws Exception {
-        Characterizer[] characterizers = {
-                new SimpleMetaFeatures(), // done before, but necessary for streams
-                new Statistical(),
-                new NominalAttDistinctValues(),
-                new AttributeEntropy(),
-                new GenericLandmarker("kNN1N", cp1NN, 2, null),
-                new GenericLandmarker("NaiveBayes", cpNB, 2, null),
-                new GenericLandmarker("DecisionStump", cpDS, 2, null),
-                new GenericLandmarker("CfsSubsetEval_kNN1N", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cp1NN)),
-                new GenericLandmarker("CfsSubsetEval_NaiveBayes", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cpNB)),
-                new GenericLandmarker("CfsSubsetEval_DecisionStump", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cpDS))
-        };
-        batchCharacterizers = new ArrayList<>(Arrays.asList(characterizers));
-        // additional parameterized batch landmarkers
-        String zeros = "0";
-        for( int i = 1; i <= 3; ++i ) {
-            zeros += "0";
-            String[] j48Option = { "-C", "." + zeros + "1" };
-            batchCharacterizers.add(new GenericLandmarker("J48." + zeros + "1.", "weka.classifiers.trees.J48", 2, j48Option));
+    public GlobalMetafeatures(String characterizer, Integer window_size) throws Exception {
+    	
+    	ArrayList<Characterizer> batchCharacterizers = new ArrayList<Characterizer>();
+    	batchCharacterizers.add(new SimpleMetaFeatures()); // always included because others depend on them
 
-            String[] repOption = { "-L", "" + i };
-            batchCharacterizers.add(new GenericLandmarker("REPTreeDepth" + i, "weka.classifiers.trees.REPTree", 2, repOption));
-
-            String[] randomtreeOption = { "-depth", "" + i };
-            batchCharacterizers.add(new GenericLandmarker("RandomTreeDepth" + i, "weka.classifiers.trees.RandomTree", 2, randomtreeOption));
+		// Add characterizer of choice
+    	if (characterizer != null && !characterizer.equals("GenericLandmarker") 
+    			&& !characterizer.equals("fast") && !characterizer.equals("SimpleMetaFeatures")) {
+    		Characterizer ch = (Characterizer) Class.forName(characterizer).newInstance();
+    		batchCharacterizers.add(ch);
+    	} 
+    	
+		// Add all 'fast' characterizers
+        if (characterizer == null || characterizer.equals("fast")) {
+        	batchCharacterizers.add(new Statistical());
+        	batchCharacterizers.add(new NominalAttDistinctValues());
+        	batchCharacterizers.add(new AttributeEntropy());
         }
-        for(Characterizer characterizer : batchCharacterizers) {
-            expectedQualities += characterizer.getNumMetaFeatures();
-            expectedIds.addAll(Arrays.asList(characterizer.getIDs()));
+        
+		// Add landmarkers
+        if (characterizer == null || characterizer.equals("GenericLandmarker")) {
+        	batchCharacterizers.add(new GenericLandmarker("kNN1N", cp1NN, 2, null));
+        	batchCharacterizers.add(new GenericLandmarker("NaiveBayes", cpNB, 2, null));
+        	batchCharacterizers.add(new GenericLandmarker("DecisionStump", cpDS, 2, null));
+        	batchCharacterizers.add(new GenericLandmarker("CfsSubsetEval_kNN1N", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cp1NN)));
+        	batchCharacterizers.add(new GenericLandmarker("CfsSubsetEval_NaiveBayes", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cpNB)));
+        	batchCharacterizers.add(new GenericLandmarker("CfsSubsetEval_DecisionStump", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cpDS)));
+        
+		    String zeros = "0";
+		    for( int i = 1; i <= 3; ++i ) {
+		        zeros += "0";
+		        String[] j48Option = { "-C", "." + zeros + "1" };
+		        batchCharacterizers.add(new GenericLandmarker("J48." + zeros + "1.", "weka.classifiers.trees.J48", 2, j48Option));
+		
+		        String[] repOption = { "-L", "" + i };
+		        batchCharacterizers.add(new GenericLandmarker("REPTreeDepth" + i, "weka.classifiers.trees.REPTree", 2, repOption));
+		
+		        String[] randomtreeOption = { "-depth", "" + i };
+		        batchCharacterizers.add(new GenericLandmarker("RandomTreeDepth" + i, "weka.classifiers.trees.RandomTree", 2, randomtreeOption));
+		    }
+        }
+        
+        for(Characterizer c : batchCharacterizers) {
+            expectedQualities += c.getNumMetaFeatures();
+            expectedIds.addAll(Arrays.asList(c.getIDs()));
         }
 
    /*     streamCharacterizers = new StreamCharacterizer[]{new ChangeDetectors(window_size)};

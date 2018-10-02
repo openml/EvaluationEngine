@@ -120,7 +120,14 @@ public class Main {
 				} else if( function.equals("extract_features_all") ) {
 					
 					String mode = cli.hasOption("x") ? "random" : "normal";
-					FantailConnector fc = new FantailConnector( apiconnector, id, mode, cli.getOptionValue("tag"), null);
+					FantailConnector fc = new FantailConnector( apiconnector, id, mode, "all", cli.getOptionValue("tag"), null);
+					fc.toString();
+					
+				} else if( function.equals("extract_features") ) {
+					// c can be a characterizer class name, 'fast' or 'all'
+					String mode = cli.hasOption("x") ? "random" : "normal";
+					String characterizer = cli.hasOption("c") ? cli.getOptionValue("c") : "all";
+					FantailConnector fc = new FantailConnector( apiconnector, id, mode, characterizer, cli.getOptionValue("tag"), null);
 					fc.toString();
 					
 				} else if( function.equals("generate_folds") ) {

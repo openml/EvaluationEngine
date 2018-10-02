@@ -49,10 +49,10 @@ public class FantailConnector {
 	private OpenmlConnector apiconnector;
 	private GlobalMetafeatures globalMetafeatures;
 
-	public FantailConnector(OpenmlConnector ac, Integer dataset_id, String mode, String priorityTag, Integer interval_size) throws Exception {
+	public FantailConnector(OpenmlConnector ac, Integer dataset_id, String mode, String characterizer, String priorityTag, Integer interval_size) throws Exception {
 		apiconnector = ac;
-		globalMetafeatures = new GlobalMetafeatures(window_size);
-
+		globalMetafeatures = new GlobalMetafeatures(characterizer, window_size);
+		
 		if (dataset_id != null) {
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " on special request. ");
 			computeMetafeatures(dataset_id);
