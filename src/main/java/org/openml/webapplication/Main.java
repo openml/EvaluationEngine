@@ -120,7 +120,7 @@ public class Main {
 				} else if( function.equals("extract_features_all") ) {
 					
 					String mode = cli.hasOption("x") ? "random" : "normal";
-					FantailConnector fc = new FantailConnector( apiconnector, id, mode, "all", cli.getOptionValue("tag"), null);
+					FantailConnector fc = new FantailConnector( apiconnector, id, mode, null, cli.getOptionValue("tag"), null);
 					fc.toString();
 					
 				} else if( function.equals("extract_features") ) {
