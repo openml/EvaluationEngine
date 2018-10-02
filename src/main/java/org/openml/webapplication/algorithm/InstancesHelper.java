@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import weka.classifiers.CostMatrix;
 import weka.core.Utils;
@@ -126,7 +125,7 @@ public class InstancesHelper {
 		return result;
 	}
 	
-	public static CostMatrix doubleToCostMatrix(JSONArray cm) throws JSONException {
+	public static CostMatrix doubleToCostMatrix(JSONArray cm){
 		CostMatrix costmatrix = new CostMatrix(cm.length());
 		for( int i = 0; i < cm.length(); ++i ) {
 			JSONArray subArray = cm.getJSONArray(i);
