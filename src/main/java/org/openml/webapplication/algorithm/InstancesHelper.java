@@ -125,7 +125,7 @@ public class InstancesHelper {
 		return result;
 	}
 	
-	public static CostMatrix doubleToCostMatrix(JSONArray cm){
+	public static CostMatrix doubleToCostMatrix(JSONArray cm) {
 		CostMatrix costmatrix = new CostMatrix(cm.length());
 		for( int i = 0; i < cm.length(); ++i ) {
 			JSONArray subArray = cm.getJSONArray(i);
