@@ -23,6 +23,14 @@ public class GlobalMetafeatures {
     private int expectedQualities;
     private ArrayList<String> expectedIds = new ArrayList<>();
 
+    /**
+     * Collection of characterizers
+     * 
+     * @param characterizer Class name of requested characterizer. Can also be 'fast' 
+     * for everything except landmarkers. If null, all characterizers are added.
+     * @param window_size for streaming landmarkers
+     * @throws Exception
+     */
     public GlobalMetafeatures(String characterizer, Integer window_size) throws Exception {
     	
     	ArrayList<Characterizer> batchCharacterizers = new ArrayList<Characterizer>();

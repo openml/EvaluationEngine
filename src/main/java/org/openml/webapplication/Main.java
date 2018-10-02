@@ -126,7 +126,7 @@ public class Main {
 				} else if( function.equals("extract_features") ) {
 					// c can be a characterizer class name, 'fast' or 'all'
 					String mode = cli.hasOption("x") ? "random" : "normal";
-					String characterizer = cli.hasOption("c") ? cli.getOptionValue("c") : "all";
+					String characterizer = cli.hasOption("c") ? cli.getOptionValue("c") : null;
 					FantailConnector fc = new FantailConnector( apiconnector, id, mode, characterizer, cli.getOptionValue("tag"), null);
 					fc.toString();
 					
