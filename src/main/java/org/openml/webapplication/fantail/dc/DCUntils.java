@@ -57,7 +57,7 @@ public class DCUntils {
 		for (int attIndex = 0; attIndex < data.numAttributes(); attIndex++) {
 
 			if (data.attribute(attIndex).isNominal() && (data.classIndex() != attIndex)) {
-				double[] attValueCounts = new double[data.numDistinctValues(attIndex)];
+				double[] attValueCounts = new double[data.attribute(attIndex).numValues()];
 
 				for (int i = 0; i < data.numInstances(); i++) {
 					Instance inst = data.instance(i);
