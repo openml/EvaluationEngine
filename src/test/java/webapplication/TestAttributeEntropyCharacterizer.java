@@ -8,15 +8,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Test;
-import org.openml.webapplication.fantail.dc.statistical.AttributeEntropy;
+import org.openml.webapplication.fantail.dc.Characterizer;
+import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 
 import weka.core.Instances;
 
 public class TestAttributeEntropyCharacterizer {
 	
-	private static final AttributeEntropy entropyMetaFeatures = new AttributeEntropy();
+	private static final Characterizer characterizer = new SimpleMetaFeatures();
 	
-	public static final Map<String, Double> getXORNumericExpectedResults() {
+	private static final Map<String, Double> getXORNumericExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("ClassEntropy", null);
 		results.put("MeanAttributeEntropy", null);
@@ -37,7 +38,7 @@ public class TestAttributeEntropyCharacterizer {
 		return results;
 	}
 
-	public static final Map<String, Double> getXORNominalExpectedResults() {
+	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("ClassEntropy", 1.0);
 		results.put("MeanAttributeEntropy", 1.0);
@@ -58,7 +59,7 @@ public class TestAttributeEntropyCharacterizer {
 		return results;
 	}
 
-	public static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
+	private static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("ClassEntropy", 1.0);
 		results.put("MeanAttributeEntropy", 0.6666666666666666);
@@ -85,7 +86,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -100,7 +101,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -115,7 +116,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());

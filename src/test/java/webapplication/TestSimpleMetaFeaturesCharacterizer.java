@@ -8,15 +8,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Test;
+import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 
 import weka.core.Instances;
 
 public class TestSimpleMetaFeaturesCharacterizer {
 
-	private static final SimpleMetaFeatures simpleMetaFeatures = new SimpleMetaFeatures();
+	private static final Characterizer characterizer = new SimpleMetaFeatures();
 	
-	public static final Map<String, Double> getXORNumericExpectedResults() {
+	private static final Map<String, Double> getXORNumericExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("NumberOfInstances", 4.0);
 		results.put("NumberOfFeatures", 3.0);
@@ -40,7 +41,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		return results;
 	}
 	
-	public static final Map<String, Double> getXORNominalExpectedResults() {
+	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("NumberOfInstances", 4.0);
 		results.put("NumberOfFeatures", 3.0);
@@ -64,7 +65,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		return results;
 	}
 	
-	public static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
+	private static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("NumberOfInstances", 4.0);
 		results.put("NumberOfFeatures", 4.0);
@@ -94,7 +95,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = simpleMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -107,7 +108,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = simpleMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -122,7 +123,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = simpleMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());

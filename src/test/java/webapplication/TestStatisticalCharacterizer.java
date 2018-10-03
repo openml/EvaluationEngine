@@ -8,15 +8,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Test;
+import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.Statistical;
 
 import weka.core.Instances;
 
 public class TestStatisticalCharacterizer {
 	
-	private static final Statistical statisticalMetaFeatures = new Statistical();
+	private static final Characterizer characterizer = new Statistical();
 
-	public static final Map<String, Double> getXORNumericExpectedResults() {
+	private static final Map<String, Double> getXORNumericExpectedResults() {
 		double mean = 0.5;
 		double stdev = 0.5773502691896257; 
 		double skewness = 0.0;
@@ -56,7 +57,7 @@ public class TestStatisticalCharacterizer {
 		return results;
 	}
 	
-	public static final Map<String, Double> getXORNominalExpectedResults() {
+	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("MeanMeansOfNumericAtts", null);
 		results.put("MeanStdDevOfNumericAtts", null);
@@ -97,7 +98,7 @@ public class TestStatisticalCharacterizer {
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -112,7 +113,7 @@ public class TestStatisticalCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -124,10 +125,11 @@ public class TestStatisticalCharacterizer {
 	@Test
 	public void testStatisticalFeaturesXorNominalObfuscated() throws Exception {
 		Instances xor = DatasetFactory.getXORNominalObfuscated();
-		Map<String, Double> expectedResults = getXORNominalExpectedResults();
+		// obfuscated results are exactly equal to the non-obfuscated results
+		Map<String, Double> expectedResults = getXORNominalExpectedResults(); 
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
