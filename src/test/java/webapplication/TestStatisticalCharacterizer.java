@@ -18,9 +18,9 @@ public class TestStatisticalCharacterizer {
 
 	public static final Map<String, Double> getXORNumericExpectedResults() {
 		double mean = 0.5;
-		double stdev = 0.5773502691896257; // TODO: this is probably a bug!
+		double stdev = 0.5773502691896257; 
 		double skewness = 0.0;
-		double kurtosis = -5.999999999999998;
+		double kurtosis = -5.999999999999998; // TODO: this is probably a bug!
 		
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("MeanMeansOfNumericAtts", mean);
