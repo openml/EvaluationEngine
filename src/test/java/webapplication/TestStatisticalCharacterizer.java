@@ -97,7 +97,7 @@ public class TestStatisticalCharacterizer {
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -112,7 +112,7 @@ public class TestStatisticalCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -127,7 +127,7 @@ public class TestStatisticalCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = statisticalMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());

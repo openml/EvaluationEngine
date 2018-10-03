@@ -28,7 +28,7 @@ public class Cardinality extends Characterizer {
 	}
 
 	@Override
-	public Map<String, Double> characterize(Instances instances) {
+	protected Map<String, Double> characterize(Instances instances) {
 		Map<String, Double> results = new TreeMap<>();
 		
 		List<Integer> all = new ArrayList<>();

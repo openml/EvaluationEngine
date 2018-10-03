@@ -32,7 +32,7 @@ public class TestCardinalityCharacterizer {
 		int dataid = 1;
 		Instances dataset = getById(dataid);
 		
-		Map<String, Double> results = Cardinality.characterize(dataset);
+		Map<String, Double> results = Cardinality.characterizeAll(dataset);
 		
 		for (String id : Cardinality.getIDs()) {
 			assertTrue(results.containsKey(id));

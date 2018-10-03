@@ -28,7 +28,26 @@ public abstract class Characterizer {
 
 	public abstract String[] getIDs();
 
-	public abstract Map<String, Double> characterize(Instances instances) throws Exception;
+	protected abstract Map<String, Double> characterize(Instances instances);
+	
+	public Map<String, Double> characterizeAll(Instances instances) throws Exception {
+		Map<String, Double> qualities = characterize(instances);
+		
+		// enforce finite double or null for all qualities
+		for (String key : qualities.keySet()) {
+			if (qualities.get(key) != null && !Double.isFinite(qualities.get(key))) {
+				throw new Exception("Quality illegal value: " + key + ", value: " + qualities.get(key));
+			}
+		}
+
+		for (String key : getIDs()) {
+			if (!qualities.containsKey(key)) {
+				throw new Exception("Quality missing: " + key);
+			}
+		}
+		
+		return qualities;
+	}
 
 	public int getNumMetaFeatures() {
 		return getIDs().length;

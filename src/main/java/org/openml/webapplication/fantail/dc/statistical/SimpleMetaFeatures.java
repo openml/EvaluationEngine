@@ -23,7 +23,7 @@ public class SimpleMetaFeatures extends Characterizer {
 		return ids;
 	}
 
-	public Map<String, Double> characterize(Instances dataset) throws Exception {
+	protected Map<String, Double> characterize(Instances dataset) {
 		Map<String, Double> qualities = new HashMap<String, Double>();
 		
 		Double NumberOfInstances = 0.0 + dataset.size();
@@ -147,19 +147,6 @@ public class SimpleMetaFeatures extends Characterizer {
 		qualities.put("MinorityClassSize", MinorityClassSize);
 		qualities.put("MajorityClassPercentage", MajorityClassPercentage);
 		qualities.put("MinorityClassPercentage", MinorityClassPercentage);
-
-		// enforce finite double or null for all qualities
-		for (String key : qualities.keySet()) {
-			if (qualities.get(key) != null && !Double.isFinite(qualities.get(key))) {
-				throw new Exception("Quality illegal value: " + key + ", value: " + qualities.get(key));
-			}
-		}
-
-		for (String key : ids) {
-			if (!qualities.containsKey(key)) {
-				throw new Exception("Quality missing: " + key);
-			}
-		}
 
 		return qualities;
 	}

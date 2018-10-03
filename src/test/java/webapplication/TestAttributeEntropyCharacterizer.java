@@ -85,7 +85,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -100,7 +100,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
@@ -115,7 +115,7 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		
 		// Check the produced class count
-		Map<String,Double> metafeatures = entropyMetaFeatures.characterize(xor);
+		Map<String,Double> metafeatures = entropyMetaFeatures.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());

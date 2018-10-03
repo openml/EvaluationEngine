@@ -26,7 +26,7 @@ public class Statistical extends Characterizer {
 	}
 
 	@Override
-	public Map<String, Double> characterize(Instances dataset) throws Exception {
+	protected Map<String, Double> characterize(Instances dataset) {
 
 		Map<String, Double> qualities = new HashMap<String, Double>();
 		int numericValues = 0;
@@ -86,19 +86,6 @@ public class Statistical extends Characterizer {
 				qualities.put("Quartile1" + category + SUFFIX, null);
 				qualities.put("Quartile2" + category + SUFFIX, null);
 				qualities.put("Quartile3" + category + SUFFIX, null);
-			}
-		}
-		
-		// enforce finite double or null for all qualities
-		for (String key : qualities.keySet()) {
-			if (qualities.get(key) != null && !Double.isFinite(qualities.get(key))) {
-				throw new Exception("Quality illegal value: " + key + ", value: " + qualities.get(key));
-			}
-		}
-
-		for (String key : ids) {
-			if (!qualities.containsKey(key)) {
-				throw new Exception("Quality missing: " + key);
 			}
 		}
 		

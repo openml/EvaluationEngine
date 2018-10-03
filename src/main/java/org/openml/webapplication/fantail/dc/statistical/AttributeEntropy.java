@@ -60,7 +60,7 @@ public class AttributeEntropy extends Characterizer {
 	}
 
 	@Override
-	public Map<String, Double> characterize(Instances data) {
+	protected Map<String, Double> characterize(Instances data) {
 		int nominal_count = 0;
 		for (int i = 0; i < data.numAttributes(); ++i) {
 			if (data.attribute(i).isNominal() && data.classIndex() != i) {

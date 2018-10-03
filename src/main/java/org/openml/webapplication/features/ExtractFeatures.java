@@ -147,7 +147,7 @@ public class ExtractFeatures {
 		}
 		List<Quality> result = new ArrayList<Quality>();
 		Characterizer simpleQualities = new SimpleMetaFeatures();
-		Map<String,Double> qualities = simpleQualities.characterize(dataset);
+		Map<String,Double> qualities = simpleQualities.characterizeAll(dataset);
 		for (String quality : qualities.keySet()) {
 			result.add(new Quality(quality, qualities.get(quality)));
 		}
