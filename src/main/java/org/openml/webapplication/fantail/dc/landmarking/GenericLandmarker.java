@@ -50,9 +50,9 @@ public class GenericLandmarker extends Characterizer {
 			results.put(landmarkerName + "Kappa", eval.kappa());
 		} catch (Exception e) {
 			e.printStackTrace();
-			results.put(landmarkerName + "AUC", -1.0);
-			results.put(landmarkerName + "ErrRate", -1.0);
-			results.put(landmarkerName + "Kappa", -1.0);
+			results.put(landmarkerName + "AUC", null);
+			results.put(landmarkerName + "ErrRate", null);
+			results.put(landmarkerName + "Kappa", null);
 		}
 		return results;
 	}
