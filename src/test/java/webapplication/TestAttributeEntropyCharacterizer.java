@@ -118,9 +118,6 @@ public class TestAttributeEntropyCharacterizer {
 		Map<String,Double> metafeatures = entropyMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			for (String mismatch : mismatches) {
-				System.out.println(mismatch + ": " + expectedResults.get(mismatch) + ", " + metafeatures.get(mismatch));
-			}
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
