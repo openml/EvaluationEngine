@@ -80,14 +80,14 @@ public class Cardinality extends Characterizer {
 		Double cardinalityAtFour = null;
 		
 		if (instances.numAttributes() >= 2) {
-			cardinalityAtTwo = (double) all.get(0) * all.get(1);
+			cardinalityAtTwo = (double) all.get(0) * Math.max(all.get(1), 1);
 		}
 		if (instances.numAttributes() >= 3) {
-			cardinalityAtThree = (double) all.get(0) * all.get(1) * all.get(2);
+			cardinalityAtThree = (double) all.get(0) * Math.max(all.get(1), 1) * Math.max(all.get(2), 1);
 		}
 
 		if (instances.numAttributes() >= 4) {
-			cardinalityAtFour = (double) all.get(0) * all.get(1) * all.get(2) * all.get(3);
+			cardinalityAtFour = (double) all.get(0) * Math.max(all.get(1), 1) * Math.max(all.get(2), 1) * Math.max(all.get(3), 1);
 		}
 		
 		results.put("CardinalityAtTwo", cardinalityAtTwo);

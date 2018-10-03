@@ -2,41 +2,110 @@ package webapplication;
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedReader;
-import java.net.URL;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.Test;
-import org.openml.apiconnector.algorithms.Input;
-import org.openml.apiconnector.io.OpenmlConnector;
-import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.Cardinality;
 
 import weka.core.Instances;
 
 public class TestCardinalityCharacterizer {
+
+	private static final Characterizer characterizer = new Cardinality();
 	
-	private static final String url = "https://www.openml.org/";
-	private static final OpenmlConnector client_read = new OpenmlConnector(url, "c1994bdb7ecb3c6f3c8f3b35f4b47f1f"); // R-TEAM
-	private static final Characterizer Cardinality = new Cardinality();
+	private static final Map<String, Double> getXORNumericExpectedResults() {
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("MeanCardinalityOfNumericAttributes", 2.0);
+		results.put("StdevCardinalityOfNumericAttributes", 0.0);
+		results.put("MinCardinalityOfNumericAttributes", 2.0);
+		results.put("MaxCardinalityOfNumericAttributes", 2.0);
+		results.put("MeanCardinalityOfNominalAttributes", null);
+		results.put("StdevCardinalityOfNominalAttributes", null);
+		results.put("MinCardinalityOfNominalAttributes", null);
+		results.put("MaxCardinalityOfNominalAttributes", null);
+		results.put("CardinalityAtTwo", 4.0);
+		results.put("CardinalityAtThree", 8.0);
+		results.put("CardinalityAtFour", null);
+		return results;
+	}
 	
-	private static Instances getById(int id) throws Exception {
-		DataSetDescription dsd = client_read.dataGet(id);
-		URL dataUrl = client_read.getOpenmlFileUrl(dsd.getFile_id(), "dataset");
-		return new Instances(new BufferedReader(Input.getURL(dataUrl)));
+	private static final Map<String, Double> getXORNominalExpectedResults() {
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("MeanCardinalityOfNumericAttributes", null);
+		results.put("StdevCardinalityOfNumericAttributes", null);
+		results.put("MinCardinalityOfNumericAttributes", null);
+		results.put("MaxCardinalityOfNumericAttributes", null);
+		results.put("MeanCardinalityOfNominalAttributes", 2.0);
+		results.put("StdevCardinalityOfNominalAttributes", 0.0);
+		results.put("MinCardinalityOfNominalAttributes", 2.0);
+		results.put("MaxCardinalityOfNominalAttributes", 2.0);
+		results.put("CardinalityAtTwo", 4.0);
+		results.put("CardinalityAtThree", 8.0);
+		results.put("CardinalityAtFour", null);
+		return results;
+	}
+	
+	private static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("MeanCardinalityOfNumericAttributes", null);
+		results.put("StdevCardinalityOfNumericAttributes", null);
+		results.put("MinCardinalityOfNumericAttributes", null);
+		results.put("MaxCardinalityOfNumericAttributes", null);
+		results.put("MeanCardinalityOfNominalAttributes", 1.5);
+		results.put("StdevCardinalityOfNominalAttributes", 1.0);
+		results.put("MinCardinalityOfNominalAttributes", 0.0);
+		results.put("MaxCardinalityOfNominalAttributes", 2.0);
+		results.put("CardinalityAtTwo", 4.0);
+		results.put("CardinalityAtThree", 8.0);
+		results.put("CardinalityAtFour", 8.0);
+		return results;
 	}
 	
 	@Test
-	public void testAnneal() throws Exception {
-		int dataid = 1;
-		Instances dataset = getById(dataid);
+	public void testCardinalityXorNumeric() throws Exception {
+		Instances xor = DatasetFactory.getXORNumeric();
+		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
-		Map<String, Double> results = Cardinality.characterizeAll(dataset);
-		
-		for (String id : Cardinality.getIDs()) {
-			assertTrue(results.containsKey(id));
-			assertTrue(results.get(id) >= 1);
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
+	public void testCardinalityXorNominal() throws Exception {
+		Instances xor = DatasetFactory.getXORNominal();
+		Map<String, Double> expectedResults = getXORNominalExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+
+	@Test
+	public void testCardinalityXorNominalObfuscated() throws Exception {
+		Instances xor = DatasetFactory.getXORNominalObfuscated();
+		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
 	}
 }

@@ -83,9 +83,6 @@ public class TestNominalAttDistinctValuesCharacterizer {
 		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			for (String mismatch : mismatches) {
-				System.out.println(mismatch + ", " + metafeatures.get(mismatch) + "," + expectedResults.get(mismatch));
-			}
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
