@@ -12,7 +12,7 @@ import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 
 import weka.core.Instances;
 
-public class TestFantail {
+public class TestSimpleMetaFeaturesCharacterizer {
 
 	private static final SimpleMetaFeatures simpleMetaFeatures = new SimpleMetaFeatures();
 	
