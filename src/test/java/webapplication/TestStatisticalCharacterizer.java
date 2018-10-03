@@ -100,9 +100,6 @@ public class TestStatisticalCharacterizer {
 		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			for (String mismatch : mismatches) {
-				System.out.println(mismatch + ": " + expectedResults.get(mismatch) + ", " + metafeatures.get(mismatch));
-			}
 			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
@@ -118,7 +115,7 @@ public class TestStatisticalCharacterizer {
 		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			fail("Mismatches: " + mismatches.toString());
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
 		assertEquals(0, mismatches.size());
@@ -133,7 +130,7 @@ public class TestStatisticalCharacterizer {
 		Map<String,Double> metafeatures = statisticalMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			fail("Mismatches: " + mismatches.toString());
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
 		assertEquals(0, mismatches.size());

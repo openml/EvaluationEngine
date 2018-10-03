@@ -97,7 +97,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String,Double> metafeatures = simpleMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			fail("Mismatches: " + mismatches.toString());
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 	}
 	
@@ -110,7 +110,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String,Double> metafeatures = simpleMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			fail("Mismatches: " + mismatches.toString());
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
 		assertEquals(0, mismatches.size());
@@ -125,7 +125,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		Map<String,Double> metafeatures = simpleMetaFeatures.characterize(xor);
 		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
 		if (mismatches.size() != 0) {
-			fail("Mismatches: " + mismatches.toString());
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
 		}
 		
 		assertEquals(0, mismatches.size());

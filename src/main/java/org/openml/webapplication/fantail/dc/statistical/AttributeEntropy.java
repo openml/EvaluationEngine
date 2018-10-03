@@ -77,40 +77,41 @@ public class AttributeEntropy extends Characterizer {
 			double meanMI = StatUtils.mean(mutualInformation);
 			double meanAttEntropy = nominal_count > 0 ? StatUtils.mean(attEntropy) : -1;
 			
-			double noiseSignalRatio;
-			double ena = 0;
+			Double noiseSignalRatio;
+			Double ena;
 	
 			if (meanMI <= 0) {
-				ena = -1;
-				noiseSignalRatio = -1;
+				ena = null;
+				noiseSignalRatio = null;
 			} else {
 				ena = classEntropy / meanMI;
 				noiseSignalRatio = (meanAttEntropy - meanMI) / meanMI;
 			}
 	
-			qualities.put(ids[0], classEntropy);
-			qualities.put(ids[1], meanAttEntropy);
-			qualities.put(ids[2], meanMI);
-			qualities.put(ids[3], ena);
-			qualities.put(ids[4], noiseSignalRatio);
+			qualities.put("ClassEntropy", classEntropy);
+			qualities.put("MeanAttributeEntropy", meanAttEntropy);
+			qualities.put("MeanMutualInformation", meanMI);
+			qualities.put("EquivalentNumberOfAtts", ena);
+			qualities.put("MeanNoiseToSignalRatio", noiseSignalRatio);
 			
-			qualities.put(ids[5], StatUtils.min(attEntropy));
-			qualities.put(ids[6], StatUtils.min(mutualInformation));
+			qualities.put("MinAttributeEntropy", StatUtils.min(attEntropy));
+			qualities.put("MinMutualInformation", StatUtils.min(mutualInformation));
 			
-			qualities.put(ids[7], StatUtils.max(attEntropy));
-			qualities.put(ids[8], StatUtils.max(mutualInformation));
+			qualities.put("MaxAttributeEntropy", StatUtils.max(attEntropy));
+			qualities.put("MaxMutualInformation", StatUtils.max(mutualInformation));
 			
-			qualities.put(ids[9], StatUtils.percentile(attEntropy,25));
-			qualities.put(ids[10], StatUtils.percentile(mutualInformation,25));
+			qualities.put("Quartile1AttributeEntropy", StatUtils.percentile(attEntropy,25));
+			qualities.put("Quartile1MutualInformation", StatUtils.percentile(mutualInformation,25));
 			
-			qualities.put(ids[11], StatUtils.percentile(attEntropy,50));
-			qualities.put(ids[12], StatUtils.percentile(mutualInformation,50));
+			qualities.put("Quartile2AttributeEntropy", StatUtils.percentile(attEntropy,50));
+			qualities.put("Quartile2MutualInformation", StatUtils.percentile(mutualInformation,50));
 			
-			qualities.put(ids[13], StatUtils.percentile(attEntropy,75));
-			qualities.put(ids[14], StatUtils.percentile(mutualInformation,75));
+			qualities.put("Quartile3AttributeEntropy", StatUtils.percentile(attEntropy,75));
+			qualities.put("Quartile3MutualInformation", StatUtils.percentile(mutualInformation,75));
+			
 		} else { // numeric target
 			for (int i = 0; i < ids.length; ++i) {
-				qualities.put(ids[i], -1.0);
+				qualities.put(ids[i], null);
 			}
 		}
 		return qualities;
