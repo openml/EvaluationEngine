@@ -9,13 +9,13 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
-import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
+import org.openml.webapplication.fantail.dc.statistical.AttributeEntropy;
 
 import weka.core.Instances;
 
 public class TestAttributeEntropyCharacterizer {
 	
-	private static final Characterizer characterizer = new SimpleMetaFeatures();
+	private static final Characterizer characterizer = new AttributeEntropy();
 	
 	private static final Map<String, Double> getXORNumericExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
@@ -81,7 +81,7 @@ public class TestAttributeEntropyCharacterizer {
 	}
 	
 	@Test
-	public void testSimpleFeaturesXorNumeric() throws Exception {
+	public void testAttributeEntropyXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
@@ -96,7 +96,7 @@ public class TestAttributeEntropyCharacterizer {
 	}
 	
 	@Test
-	public void testSimpleFeaturesXorNominal() throws Exception {
+	public void testAttributeEntropyXorNominal() throws Exception {
 		Instances xor = DatasetFactory.getXORNominal();
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
@@ -111,7 +111,7 @@ public class TestAttributeEntropyCharacterizer {
 	}
 	
 	@Test
-	public void testSimpleFeaturesXorNominalObfuscated() throws Exception {
+	public void testAttributeEntropyXorNominalObfuscated() throws Exception {
 		Instances xor = DatasetFactory.getXORNominalObfuscated();
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		
