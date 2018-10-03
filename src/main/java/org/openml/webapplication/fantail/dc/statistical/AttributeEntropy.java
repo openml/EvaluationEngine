@@ -80,7 +80,7 @@ public class AttributeEntropy extends Characterizer {
 			if (nominal_count > 0) {
 				qualities.put("MeanAttributeEntropy", StatUtils.mean(attEntropy));
 				
-				if (meanMI <= 0) {
+				if (meanMI > 0) {
 					qualities.put("EquivalentNumberOfAtts", classEntropy / meanMI);
 					qualities.put("MeanNoiseToSignalRatio", (StatUtils.mean(attEntropy) - meanMI) / meanMI);
 				} else {
