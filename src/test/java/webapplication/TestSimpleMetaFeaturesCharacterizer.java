@@ -36,7 +36,7 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		results.put("MinorityClassSize", null);
 		results.put("MajorityClassPercentage", null);
 		results.put("MinorityClassPercentage", null);
-		results.put("AutoCorrelation", 1.0 / 3.0); // TODO: really OK?
+		results.put("AutoCorrelation", 1.0 / 3.0);
 		return results;
 	}
 	
