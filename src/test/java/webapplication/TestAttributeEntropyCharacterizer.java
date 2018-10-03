@@ -38,6 +38,27 @@ public class TestAttributeEntropyCharacterizer {
 		return results;
 	}
 
+	private static final Map<String, Double> getXORMixedExpectedResults() {
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("ClassEntropy", 1.0);
+		results.put("MeanAttributeEntropy", null);
+		results.put("MeanMutualInformation", null);
+		results.put("EquivalentNumberOfAtts", null);
+		results.put("MeanNoiseToSignalRatio", null);
+		results.put("MinAttributeEntropy", null);
+		results.put("MinMutualInformation", null);
+		results.put("MaxAttributeEntropy", null);
+		results.put("MaxMutualInformation", null);
+		results.put("Quartile1AttributeEntropy", null);
+		results.put("Quartile1MutualInformation", null);
+		results.put("Quartile2AttributeEntropy", null);
+		results.put("Quartile2MutualInformation", null);
+		results.put("Quartile3AttributeEntropy", null);
+		results.put("Quartile3MutualInformation", null);
+		
+		return results;
+	}
+
 	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("ClassEntropy", 1.0);
@@ -84,6 +105,21 @@ public class TestAttributeEntropyCharacterizer {
 	public void testAttributeEntropyXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
+	public void testAttributeEntropyXorMixed() throws Exception {
+		Instances xor = DatasetFactory.getXORMixed();
+		Map<String, Double> expectedResults = getXORMixedExpectedResults();
 		
 		// Check the produced class count
 		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);

@@ -73,41 +73,51 @@ public class AttributeEntropy extends Characterizer {
 			double classEntropy = DCUntils.computeClassEntropy(data);
 			double[] attEntropy = DCUntils.computeAttributeEntropy(data);
 			double[] mutualInformation = DCUntils.computeMutualInformation(data);
-			
 			double meanMI = StatUtils.mean(mutualInformation);
-			double meanAttEntropy = nominal_count > 0 ? StatUtils.mean(attEntropy) : -1;
-			
-			Double noiseSignalRatio;
-			Double ena;
-	
-			if (meanMI <= 0) {
-				ena = null;
-				noiseSignalRatio = null;
-			} else {
-				ena = classEntropy / meanMI;
-				noiseSignalRatio = (meanAttEntropy - meanMI) / meanMI;
-			}
 	
 			qualities.put("ClassEntropy", classEntropy);
-			qualities.put("MeanAttributeEntropy", meanAttEntropy);
-			qualities.put("MeanMutualInformation", meanMI);
-			qualities.put("EquivalentNumberOfAtts", ena);
-			qualities.put("MeanNoiseToSignalRatio", noiseSignalRatio);
 			
-			qualities.put("MinAttributeEntropy", StatUtils.min(attEntropy));
-			qualities.put("MinMutualInformation", StatUtils.min(mutualInformation));
-			
-			qualities.put("MaxAttributeEntropy", StatUtils.max(attEntropy));
-			qualities.put("MaxMutualInformation", StatUtils.max(mutualInformation));
-			
-			qualities.put("Quartile1AttributeEntropy", StatUtils.percentile(attEntropy,25));
-			qualities.put("Quartile1MutualInformation", StatUtils.percentile(mutualInformation,25));
-			
-			qualities.put("Quartile2AttributeEntropy", StatUtils.percentile(attEntropy,50));
-			qualities.put("Quartile2MutualInformation", StatUtils.percentile(mutualInformation,50));
-			
-			qualities.put("Quartile3AttributeEntropy", StatUtils.percentile(attEntropy,75));
-			qualities.put("Quartile3MutualInformation", StatUtils.percentile(mutualInformation,75));
+			if (nominal_count > 0) {
+				qualities.put("MeanAttributeEntropy", StatUtils.mean(attEntropy));
+				
+				if (meanMI <= 0) {
+					qualities.put("EquivalentNumberOfAtts", classEntropy / meanMI);
+					qualities.put("MeanNoiseToSignalRatio", (StatUtils.mean(attEntropy) - meanMI) / meanMI);
+				} else {
+					qualities.put("EquivalentNumberOfAtts", null);
+					qualities.put("MeanNoiseToSignalRatio", null);
+				}
+				qualities.put("MeanMutualInformation", meanMI);
+				qualities.put("MinMutualInformation", StatUtils.min(mutualInformation));
+				qualities.put("MaxMutualInformation", StatUtils.max(mutualInformation));
+				qualities.put("Quartile1MutualInformation", StatUtils.percentile(mutualInformation,25));
+				qualities.put("Quartile2MutualInformation", StatUtils.percentile(mutualInformation,50));
+				qualities.put("Quartile3MutualInformation", StatUtils.percentile(mutualInformation,75));
+				
+				qualities.put("MinAttributeEntropy", StatUtils.min(attEntropy));
+				qualities.put("MaxAttributeEntropy", StatUtils.max(attEntropy));
+				qualities.put("Quartile1AttributeEntropy", StatUtils.percentile(attEntropy,25));
+				qualities.put("Quartile2AttributeEntropy", StatUtils.percentile(attEntropy,50));
+				qualities.put("Quartile3AttributeEntropy", StatUtils.percentile(attEntropy,75));
+			} else {
+				qualities.put("MeanAttributeEntropy", null);
+				
+				qualities.put("EquivalentNumberOfAtts", null);
+				qualities.put("MeanNoiseToSignalRatio", null);
+				
+				qualities.put("MeanMutualInformation", null);
+				qualities.put("MinMutualInformation", null);
+				qualities.put("MaxMutualInformation", null);
+				qualities.put("Quartile1MutualInformation", null);
+				qualities.put("Quartile2MutualInformation", null);
+				qualities.put("Quartile3MutualInformation", null);
+				
+				qualities.put("MinAttributeEntropy", null);
+				qualities.put("MaxAttributeEntropy", null);
+				qualities.put("Quartile1AttributeEntropy", null);
+				qualities.put("Quartile2AttributeEntropy", null);
+				qualities.put("Quartile3AttributeEntropy", null);
+			}
 			
 		} else { // numeric target
 			for (int i = 0; i < ids.length; ++i) {

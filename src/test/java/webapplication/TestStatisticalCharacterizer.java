@@ -57,6 +57,46 @@ public class TestStatisticalCharacterizer {
 		return results;
 	}
 	
+	private static final Map<String, Double> getXORMixedExpectedResults() {
+		double mean = 0.5;
+		double stdev = 0.5773502691896257; 
+		double skewness = 0.0;
+		double kurtosis = -5.999999999999998; // TODO: this is probably a bug!
+		
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("MeanMeansOfNumericAtts", mean);
+		results.put("MeanStdDevOfNumericAtts", stdev);
+		results.put("MeanKurtosisOfNumericAtts", kurtosis);
+		results.put("MeanSkewnessOfNumericAtts", skewness);
+
+		results.put("MinMeansOfNumericAtts", mean);
+		results.put("MinStdDevOfNumericAtts", stdev);
+		results.put("MinKurtosisOfNumericAtts", kurtosis);
+		results.put("MinSkewnessOfNumericAtts", skewness);
+
+		results.put("MaxMeansOfNumericAtts", mean);
+		results.put("MaxStdDevOfNumericAtts", stdev);
+		results.put("MaxKurtosisOfNumericAtts", kurtosis);
+		results.put("MaxSkewnessOfNumericAtts", skewness);
+
+		results.put("Quartile1MeansOfNumericAtts", mean);
+		results.put("Quartile1StdDevOfNumericAtts", stdev);
+		results.put("Quartile1KurtosisOfNumericAtts", kurtosis);
+		results.put("Quartile1SkewnessOfNumericAtts", skewness);
+
+		results.put("Quartile2MeansOfNumericAtts", mean);
+		results.put("Quartile2StdDevOfNumericAtts", stdev);
+		results.put("Quartile2KurtosisOfNumericAtts", kurtosis);
+		results.put("Quartile2SkewnessOfNumericAtts", skewness);
+
+		results.put("Quartile3MeansOfNumericAtts", mean);
+		results.put("Quartile3StdDevOfNumericAtts", stdev);
+		results.put("Quartile3KurtosisOfNumericAtts", kurtosis);
+		results.put("Quartile3SkewnessOfNumericAtts", skewness);
+		
+		return results;
+	}
+	
 	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("MeanMeansOfNumericAtts", null);
@@ -96,6 +136,21 @@ public class TestStatisticalCharacterizer {
 	public void testStatisticalFeaturesXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
+	public void testStatisticalFeaturesXorMixed() throws Exception {
+		Instances xor = DatasetFactory.getXORMixed();
+		Map<String, Double> expectedResults = getXORMixedExpectedResults();
 		
 		// Check the produced class count
 		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
