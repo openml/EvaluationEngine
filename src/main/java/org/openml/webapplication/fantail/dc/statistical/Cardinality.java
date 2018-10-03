@@ -80,6 +80,7 @@ public class Cardinality extends Characterizer {
 		Double cardinalityAtFour = null;
 		
 		if (instances.numAttributes() >= 2) {
+			// Note that if we don't use Math.max(all.get(X), 1) for any X > 0, cardinality might become 0
 			cardinalityAtTwo = (double) all.get(0) * Math.max(all.get(1), 1);
 		}
 		if (instances.numAttributes() >= 3) {
