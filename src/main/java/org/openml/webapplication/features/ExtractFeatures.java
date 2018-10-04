@@ -21,13 +21,9 @@ package org.openml.webapplication.features;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.xml.DataFeature.Feature;
-import org.openml.apiconnector.xml.DataQuality.Quality;
-import org.openml.webapplication.fantail.dc.Characterizer;
-import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 import org.openml.webapplication.models.AttributeStatistics;
 
 import weka.core.Attribute;
@@ -36,8 +32,7 @@ import weka.core.Instances;
 
 public class ExtractFeatures {
 	
-	public static final int MAX_SIZE_CLASS_DISTR = 16384;
-	public static final int MAX_SIZE_NOMINAL_VALUES = 524288;
+	private static final int MAX_SIZE_CLASS_DISTR = 16384;
 	
 	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
 		if (defaultClass != null) {
@@ -133,24 +128,5 @@ public class ExtractFeatures {
 					standardDeviation, classDistr));
 		}
 		return resultFeatures;
-	}
-	
-	public static List<Quality> getQualities(Instances dataset, String defaultClass) throws Exception {
-		if (defaultClass != null) {
-			if(defaultClass.contains(",")){
-				dataset.setClass(dataset.attribute(defaultClass.split(",")[0]));
-			} else {
-				dataset.setClass(dataset.attribute(defaultClass));
-			}
-		} else {
-			dataset.setClassIndex(dataset.numAttributes()-1);
-		}
-		List<Quality> result = new ArrayList<Quality>();
-		Characterizer simpleQualities = new SimpleMetaFeatures();
-		Map<String,Double> qualities = simpleQualities.characterizeAll(dataset);
-		for (String quality : qualities.keySet()) {
-			result.add(new Quality(quality, qualities.get(quality)));
-		}
-		return result;
 	}
 }

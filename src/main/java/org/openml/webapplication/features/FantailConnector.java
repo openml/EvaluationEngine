@@ -44,33 +44,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class FantailConnector {
 	private final Integer window_size = null; // TODO: make it work again
 	private static final XStream xstream = XstreamXmlMapping.getInstance();
 	private OpenmlConnector apiconnector;
-	private GlobalMetafeatures globalMetafeatures;
+	private final List<Characterizer> CHARACTERIZERS;
 
-	public FantailConnector(OpenmlConnector ac, Integer dataset_id, String mode, String priorityTag, Integer interval_size) throws Exception {
+	public FantailConnector(OpenmlConnector ac, List<Characterizer> characterizers) throws Exception {
 		apiconnector = ac;
-		globalMetafeatures = new GlobalMetafeatures(window_size);
-
+		CHARACTERIZERS = characterizers;
+	}
+	
+	public void start(Integer dataset_id, String mode, String priorityTag, Integer interval_size) throws Exception {
 		if (dataset_id != null) {
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " on special request. ");
 			computeMetafeatures(dataset_id);
-
 		} else {
-			DataUnprocessed du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds(), priorityTag);
+			List<String> expectedQualities = CharacterizerFactory.getExpectedQualities(CHARACTERIZERS);
+			DataUnprocessed du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, expectedQualities, priorityTag);
 			while (du != null) {
 				Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " as obtained from database. ");
 				computeMetafeatures(du.getDatasets()[0].getDid());
-				du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, globalMetafeatures.getExpectedIds(), priorityTag);
+				du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, expectedQualities, priorityTag);
 			}
 			Conversion.log("OK", "Process Dataset", "No more datasets to process. ");
 		}
 	}
 
-	private void computeMetafeatures(int datasetId) throws Exception {
+	public void computeMetafeatures(int datasetId) throws Exception {
 		Conversion.log("OK", "Download", "Start downloading dataset: " + datasetId);
 		DataSetDescription dsd = apiconnector.dataGet(datasetId);
 		DataFeature dataFeatures = apiconnector.dataFeatures(datasetId);
@@ -87,10 +91,21 @@ public class FantailConnector {
 		
 		Instances dataset = new Instances(new FileReader(apiconnector.datasetGet(dsd)));
 		List<String> qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId).getQualityNames());
-		extractFeatures(dsd.getId(), dataset, targetFeatures, ignoreFeatures, dsd.getRow_id_attribute(), qualitiesAvailable);
+		Set<Quality> qualities = extractFeatures(dsd.getId(), dataset, targetFeatures, ignoreFeatures, dsd.getRow_id_attribute(), qualitiesAvailable);
+		
+		// now upload the qualitues
+		Conversion.log("OK", "Extract Features", "Done generating features, start wrapping up");
+		if (qualities.size() > 0) {
+			DataQuality dq = new DataQuality(datasetId, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]));
+			String strQualities = xstream.toXML(dq);
+			DataQualityUpload dqu = apiconnector.dataQualitiesUpload(Conversion.stringToTempFile(strQualities, "qualities_did_" + datasetId, "xml"));
+			Conversion.log("OK", "Extract Features", "DONE: " + dqu.getDid());
+		} else {
+			Conversion.log("OK", "Extract Features", "DONE: Nothing to upload");
+		}
 	}
 
-	private void extractFeatures(int did, Instances dataset, List<String> targetAttributes, List<String> ignoreAttributes, String rowIdAttribute, List<String> qualitiesAvailable) throws Exception {
+	private Set<Quality> extractFeatures(int did, Instances dataset, List<String> targetAttributes, List<String> ignoreAttributes, String rowIdAttribute, List<String> qualitiesAvailable) throws Exception {
 		Conversion.log("OK", "Extract Features", "Start extracting features for dataset: " + did);
 		
 		if (targetAttributes != null && targetAttributes.size() == 1) {
@@ -129,7 +144,7 @@ public class FantailConnector {
 			}
 		}*/
 
-		List<Quality> qualities = new ArrayList<>();
+		Set<Quality> qualities = new TreeSet<Quality>();
 		if (window_size != null) {
 			Conversion.log("OK", "Extract Features", "Running Batch Characterizers (partial data)");
 
@@ -138,7 +153,7 @@ public class FantailConnector {
 					Conversion.log("OK", "FantailConnector",
 							"Starting window [" + i + "," + (i + window_size) + "> (did = " + did + ",total size = " + dataset.numInstances() + ")");
 				}
-				qualities.addAll(datasetCharacteristics(dataset, i, window_size, null, fullDataset));
+				qualities.addAll(datasetCharacteristics(dataset, CHARACTERIZERS, i, window_size, null, fullDataset));
 
 				/*for (StreamCharacterizer sc : globalMetafeatures.getStreamCharacterizers()) {
 					// preventing nullpointer exception (if stream characterizer was already run)
@@ -150,7 +165,7 @@ public class FantailConnector {
 
 		} else {
 			Conversion.log("OK", "Extract Features", "Running Batch Characterizers (full data, might take a while)");
-			qualities.addAll(datasetCharacteristics(dataset, null, null, qualitiesAvailable, fullDataset));
+			qualities.addAll(datasetCharacteristics(dataset, CHARACTERIZERS, null, null, qualitiesAvailable, fullDataset));
 			/*for (StreamCharacterizer sc : globalMetafeatures.getStreamCharacterizers()) {
 				Map<String, Double> streamqualities = sc.global();
 				if (streamqualities != null) {
@@ -158,20 +173,11 @@ public class FantailConnector {
 				}
 			}*/
 		}
-		Conversion.log("OK", "Extract Features", "Done generating features, start wrapping up");
-		if (qualities.size() > 0) {
-			DataQuality dq = new DataQuality(did, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]));
-			String strQualities = xstream.toXML(dq);
-			DataQualityUpload dqu = apiconnector.dataQualitiesUpload(Conversion.stringToTempFile(strQualities, "qualities_did_" + did, "xml"));
-			Conversion.log("OK", "Extract Features", "DONE: " + dqu.getDid());
-		} else {
-			Conversion.log("OK", "Extract Features", "DONE: Nothing to upload");
-		}
+		return qualities;
 	}
 
-	private List<Quality> datasetCharacteristics(Instances dataset, Integer start, Integer interval_size, List<String> qualitiesAvailable,
-			Instances fullDataset) throws Exception {
-		List<Quality> result = new ArrayList<>();
+	private static Set<Quality> datasetCharacteristics(Instances dataset, List<Characterizer> characterizers, Integer start, Integer interval_size, List<String> qualitiesAvailable, Instances fullDataset) throws Exception {
+		Set<Quality> result = new TreeSet<>();
 		Instances intervalData;
 
 		// Be careful changing this!
@@ -184,11 +190,11 @@ public class FantailConnector {
 			// todo: use StringToNominal filter? might be too expensive
 		}
 
-		for (Characterizer dc : globalMetafeatures.getCharacterizers()) {
-			if (qualitiesAvailable != null && qualitiesAvailable.containsAll(Arrays.asList(dc.getIDs())) == false) {
+		for (Characterizer dc : characterizers) {
+			if (qualitiesAvailable.containsAll(Arrays.asList(dc.getIDs())) == false) {
 				Conversion.log("OK", "Extract Batch Features", dc.getClass().getName() + ": " + Arrays.toString(dc.getIDs()));
 				Map<String, Double> qualities = dc.characterizeAll(intervalData);
-				result.addAll(hashMaptoList(qualities, start, interval_size));
+				result.addAll(hashMaptoSet(qualities, start, interval_size));
 			} else {
 				Conversion.log("OK", "Extract Batch Features", dc.getClass().getName() + " - already in database");
 			}
@@ -197,8 +203,8 @@ public class FantailConnector {
 		return result;
 	}
 
-	public static List<Quality> hashMaptoList(Map<String, Double> map, Integer start, Integer size) {
-		List<Quality> result = new ArrayList<>();
+	private static Set<Quality> hashMaptoSet(Map<String, Double> map, Integer start, Integer size) {
+		Set<Quality> result = new TreeSet<>();
 		for (String quality : map.keySet()) {
 			Integer end = start != null ? start + size : null;
 			result.add(new Quality(quality, map.get(quality), start, end, null));
