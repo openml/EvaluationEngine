@@ -84,20 +84,30 @@ public class SimpleMetaFeatures extends Characterizer {
 		PercentageOfMissingValues = (NumberOfFeatures * NumberOfInstances > 0 ? NumberOfMissingValues / (NumberOfFeatures * NumberOfInstances) * 100 : null);
 
 		// AutoCorrelation
-		double TimeBasedChanges = 0.0;
-		for (int i = 1; i < dataset.numInstances(); i++) {
-			Instance currentInstance = dataset.get(i);
-			Instance previousInstance = dataset.get(i - 1);
-			if (dataset.classAttribute().isNumeric()) {
-				TimeBasedChanges += Math.abs(previousInstance.classValue() - currentInstance.classValue());
-			} else if (dataset.classAttribute().isNominal()) {
-				TimeBasedChanges += (previousInstance.classValue() == currentInstance.classValue() ? 0 : 1);
+		if (dataset.classIndex() >= 0) {
+			double TimeBasedChanges = 0.0;
+			for (int i = 1; i < dataset.numInstances(); i++) {
+				Instance currentInstance = dataset.get(i);
+				Instance previousInstance = dataset.get(i - 1);
+				if (dataset.classAttribute().isNumeric()) {
+					TimeBasedChanges += Math.abs(previousInstance.classValue() - currentInstance.classValue());
+				} else if (dataset.classAttribute().isNominal()) {
+					TimeBasedChanges += (previousInstance.classValue() == currentInstance.classValue() ? 0 : 1);
+				}
 			}
+			AutoCorrelation = (NumberOfInstances > 1 ? new Double(NumberOfInstances - 1 - TimeBasedChanges) / new Double(NumberOfInstances - 1.0) : 1.0);
+		} else {
+			AutoCorrelation = null;
 		}
-		AutoCorrelation = (NumberOfInstances > 1 ? new Double(NumberOfInstances - 1 - TimeBasedChanges) / new Double(NumberOfInstances - 1.0) : 1.0);
-
+		
 		// Class properties
-		if (dataset.attribute(dataset.classIndex()).type() == Attribute.NUMERIC) {
+		if (dataset.classIndex() < 0) {
+			NumberOfClasses = null;
+			MajorityClassSize = null;
+			MinorityClassSize = null;
+			MajorityClassPercentage = null;
+			MinorityClassPercentage = null;
+		} else if (dataset.attribute(dataset.classIndex()).type() == Attribute.NUMERIC) {
 			NumberOfClasses = 0.0;
 			MajorityClassSize = null;
 			MinorityClassSize = null;

@@ -26,7 +26,21 @@ public class DatasetFactory {
 		return xorDataset;
 	}
 	
+	public static final Instances getXORNumericNoClass() {
+		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+		attributes.add(new Attribute("x1"));
+		attributes.add(new Attribute("x2"));
+		attributes.add(new Attribute("y"));
+		Instances xorDataset = new Instances("XorNumeric", attributes , 0);
 
+		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 0.0, 0.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 1.0, 1.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 0.0, 1.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 1.0, 0.0}));
+		
+		return xorDataset;
+	}
+	
 	public static final Instances getXORMixed() {
 		List<String> values = new ArrayList<String>();
 		values.add("False");

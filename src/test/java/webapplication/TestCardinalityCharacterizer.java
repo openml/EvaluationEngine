@@ -80,6 +80,22 @@ public class TestCardinalityCharacterizer {
 	}
 	
 	@Test
+	public void testCardinalityXorNumericNoClass() throws Exception {
+		Instances xor = DatasetFactory.getXORNumericNoClass();
+		// results currently the same as vanilla numeric
+		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
 	public void testCardinalityXorNominal() throws Exception {
 		Instances xor = DatasetFactory.getXORNominal();
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();

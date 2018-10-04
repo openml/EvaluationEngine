@@ -148,6 +148,22 @@ public class TestStatisticalCharacterizer {
 	}
 	
 	@Test
+	public void testStatisticalFeaturesXorNumericNoClass() throws Exception {
+		Instances xor = DatasetFactory.getXORNumericNoClass();
+		// no class results are exactly equal to the with class results
+		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
 	public void testStatisticalFeaturesXorMixed() throws Exception {
 		Instances xor = DatasetFactory.getXORMixed();
 		Map<String, Double> expectedResults = getXORMixedExpectedResults();

@@ -69,7 +69,7 @@ public class AttributeEntropy extends Characterizer {
 		}
 		
 		Map<String, Double> qualities = new HashMap<String, Double>();
-		if (data.classAttribute().isNominal()) {
+		if (data.classIndex() > 0 && data.classAttribute().isNominal()) {
 			double classEntropy = DCUntils.computeClassEntropy(data);
 			double[] attEntropy = DCUntils.computeAttributeEntropy(data);
 			double[] mutualInformation = DCUntils.computeMutualInformation(data);
