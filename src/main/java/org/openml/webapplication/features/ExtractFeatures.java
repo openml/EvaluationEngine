@@ -135,7 +135,7 @@ public class ExtractFeatures {
 		return resultFeatures;
 	}
 	
-	public static List<Quality> getQualities(Instances dataset, String defaultClass) {
+	public static List<Quality> getQualities(Instances dataset, String defaultClass) throws Exception {
 		if (defaultClass != null) {
 			if(defaultClass.contains(",")){
 				dataset.setClass(dataset.attribute(defaultClass.split(",")[0]));
@@ -147,7 +147,7 @@ public class ExtractFeatures {
 		}
 		List<Quality> result = new ArrayList<Quality>();
 		Characterizer simpleQualities = new SimpleMetaFeatures();
-		Map<String,Double> qualities = simpleQualities.characterize(dataset);
+		Map<String,Double> qualities = simpleQualities.characterizeAll(dataset);
 		for (String quality : qualities.keySet()) {
 			result.add(new Quality(quality, qualities.get(quality)));
 		}

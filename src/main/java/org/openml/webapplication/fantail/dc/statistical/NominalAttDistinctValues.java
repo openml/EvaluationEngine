@@ -22,46 +22,40 @@ public class NominalAttDistinctValues extends Characterizer {
 	}
 
 	@Override
-	public Map<String, Double> characterize(Instances dataset) {
+	protected Map<String, Double> characterize(Instances dataset) {
 		Map<String, Double> qualities = new HashMap<String, Double>();
-
-		try {
-			DescriptiveStatistics distinctValuesStats = new DescriptiveStatistics();
-			for (int attribute = 0; attribute < dataset.numAttributes(); attribute++) {
-				if (dataset.attribute(attribute).isNominal()) {
-
-					ArrayList<Double> valuesList = new ArrayList<Double>();
-					for (int instances = 0; instances < dataset.numInstances(); instances++) {
-						if (!dataset.get(instances).isMissing(attribute)) {
-							double value = dataset.get(instances).value(attribute);
-							if (!valuesList.contains(value)) {
-								valuesList.add(value);
-							}
+		int nominalAtts = 0;
+		
+		DescriptiveStatistics distinctValuesStats = new DescriptiveStatistics();
+		for (int attribute = 0; attribute < dataset.numAttributes(); attribute++) {
+			if (dataset.attribute(attribute).isNominal()) {
+				nominalAtts += 1;
+				
+				ArrayList<Double> valuesList = new ArrayList<Double>();
+				for (int instances = 0; instances < dataset.numInstances(); instances++) {
+					if (!dataset.get(instances).isMissing(attribute)) {
+						double value = dataset.get(instances).value(attribute);
+						if (!valuesList.contains(value)) {
+							valuesList.add(value);
 						}
 					}
-
-					distinctValuesStats.addValue(valuesList.size());
 				}
-			}
 
+				distinctValuesStats.addValue(valuesList.size());
+			}
+		}
+		
+		if (nominalAtts > 0) {
 			qualities.put("MaxNominalAttDistinctValues", distinctValuesStats.getMax());
 			qualities.put("MinNominalAttDistinctValues", distinctValuesStats.getMin());
 			qualities.put("MeanNominalAttDistinctValues", distinctValuesStats.getMean());
 			qualities.put("StdvNominalAttDistinctValues", distinctValuesStats.getStandardDeviation());
-		} catch (Exception e) {
+		} else {
+			qualities.put("MaxNominalAttDistinctValues", null);
+			qualities.put("MinNominalAttDistinctValues", null);
+			qualities.put("MeanNominalAttDistinctValues", null);
+			qualities.put("StdvNominalAttDistinctValues", null);
 		}
-
-		// enforce finite double or null for all qualities
-		for (String key : qualities.keySet()) {
-			if (qualities.get(key) != null && !Double.isFinite(qualities.get(key)))
-				qualities.replace(key, null);
-		}
-
-		for (String key : ids) {
-			if (!qualities.containsKey(key))
-				qualities.put(key, null);
-		}
-
 		return qualities;
 	}
 }

@@ -60,7 +60,7 @@ public class AttributeEntropy extends Characterizer {
 	}
 
 	@Override
-	public Map<String, Double> characterize(Instances data) {
+	protected Map<String, Double> characterize(Instances data) {
 		int nominal_count = 0;
 		for (int i = 0; i < data.numAttributes(); ++i) {
 			if (data.attribute(i).isNominal() && data.classIndex() != i) {
@@ -73,44 +73,55 @@ public class AttributeEntropy extends Characterizer {
 			double classEntropy = DCUntils.computeClassEntropy(data);
 			double[] attEntropy = DCUntils.computeAttributeEntropy(data);
 			double[] mutualInformation = DCUntils.computeMutualInformation(data);
-			
 			double meanMI = StatUtils.mean(mutualInformation);
-			double meanAttEntropy = nominal_count > 0 ? StatUtils.mean(attEntropy) : -1;
-			
-			double noiseSignalRatio;
-			double ena = 0;
 	
-			if (meanMI <= 0) {
-				ena = -1;
-				noiseSignalRatio = -1;
+			qualities.put("ClassEntropy", classEntropy);
+			
+			if (nominal_count > 0) {
+				qualities.put("MeanAttributeEntropy", StatUtils.mean(attEntropy));
+				
+				if (meanMI > 0) {
+					qualities.put("EquivalentNumberOfAtts", classEntropy / meanMI);
+					qualities.put("MeanNoiseToSignalRatio", (StatUtils.mean(attEntropy) - meanMI) / meanMI);
+				} else {
+					qualities.put("EquivalentNumberOfAtts", null);
+					qualities.put("MeanNoiseToSignalRatio", null);
+				}
+				qualities.put("MeanMutualInformation", meanMI);
+				qualities.put("MinMutualInformation", StatUtils.min(mutualInformation));
+				qualities.put("MaxMutualInformation", StatUtils.max(mutualInformation));
+				qualities.put("Quartile1MutualInformation", StatUtils.percentile(mutualInformation,25));
+				qualities.put("Quartile2MutualInformation", StatUtils.percentile(mutualInformation,50));
+				qualities.put("Quartile3MutualInformation", StatUtils.percentile(mutualInformation,75));
+				
+				qualities.put("MinAttributeEntropy", StatUtils.min(attEntropy));
+				qualities.put("MaxAttributeEntropy", StatUtils.max(attEntropy));
+				qualities.put("Quartile1AttributeEntropy", StatUtils.percentile(attEntropy,25));
+				qualities.put("Quartile2AttributeEntropy", StatUtils.percentile(attEntropy,50));
+				qualities.put("Quartile3AttributeEntropy", StatUtils.percentile(attEntropy,75));
 			} else {
-				ena = classEntropy / meanMI;
-				noiseSignalRatio = (meanAttEntropy - meanMI) / meanMI;
+				qualities.put("MeanAttributeEntropy", null);
+				
+				qualities.put("EquivalentNumberOfAtts", null);
+				qualities.put("MeanNoiseToSignalRatio", null);
+				
+				qualities.put("MeanMutualInformation", null);
+				qualities.put("MinMutualInformation", null);
+				qualities.put("MaxMutualInformation", null);
+				qualities.put("Quartile1MutualInformation", null);
+				qualities.put("Quartile2MutualInformation", null);
+				qualities.put("Quartile3MutualInformation", null);
+				
+				qualities.put("MinAttributeEntropy", null);
+				qualities.put("MaxAttributeEntropy", null);
+				qualities.put("Quartile1AttributeEntropy", null);
+				qualities.put("Quartile2AttributeEntropy", null);
+				qualities.put("Quartile3AttributeEntropy", null);
 			}
-	
-			qualities.put(ids[0], classEntropy);
-			qualities.put(ids[1], meanAttEntropy);
-			qualities.put(ids[2], meanMI);
-			qualities.put(ids[3], ena);
-			qualities.put(ids[4], noiseSignalRatio);
 			
-			qualities.put(ids[5], StatUtils.min(attEntropy));
-			qualities.put(ids[6], StatUtils.min(mutualInformation));
-			
-			qualities.put(ids[7], StatUtils.max(attEntropy));
-			qualities.put(ids[8], StatUtils.max(mutualInformation));
-			
-			qualities.put(ids[9], StatUtils.percentile(attEntropy,25));
-			qualities.put(ids[10], StatUtils.percentile(mutualInformation,25));
-			
-			qualities.put(ids[11], StatUtils.percentile(attEntropy,50));
-			qualities.put(ids[12], StatUtils.percentile(mutualInformation,50));
-			
-			qualities.put(ids[13], StatUtils.percentile(attEntropy,75));
-			qualities.put(ids[14], StatUtils.percentile(mutualInformation,75));
 		} else { // numeric target
 			for (int i = 0; i < ids.length; ++i) {
-				qualities.put(ids[i], -1.0);
+				qualities.put(ids[i], null);
 			}
 		}
 		return qualities;

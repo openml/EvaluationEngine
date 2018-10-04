@@ -167,7 +167,7 @@ public class FantailConnector {
 		for (Characterizer dc : globalMetafeatures.getCharacterizers()) {
 			if (qualitiesAvailable != null && qualitiesAvailable.containsAll(Arrays.asList(dc.getIDs())) == false) {
 				Conversion.log("OK", "Extract Batch Features", dc.getClass().getName() + ": " + Arrays.toString(dc.getIDs()));
-				Map<String, Double> qualities = dc.characterize(intervalData);
+				Map<String, Double> qualities = dc.characterizeAll(intervalData);
 				result.addAll(hashMaptoList(qualities, start, interval_size));
 			} else {
 				Conversion.log("OK", "Extract Batch Features", dc.getClass().getName() + " - already in database");
