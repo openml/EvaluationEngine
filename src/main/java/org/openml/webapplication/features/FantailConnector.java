@@ -23,6 +23,8 @@ import com.thoughtworks.xstream.XStream;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Constants;
+import org.openml.apiconnector.xml.DataFeature;
+import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataQuality;
 import org.openml.apiconnector.xml.DataQuality.Quality;
 import org.openml.apiconnector.xml.DataQualityUpload;
@@ -71,26 +73,44 @@ public class FantailConnector {
 	private void computeMetafeatures(int datasetId) throws Exception {
 		Conversion.log("OK", "Download", "Start downloading dataset: " + datasetId);
 		DataSetDescription dsd = apiconnector.dataGet(datasetId);
+		DataFeature dataFeatures = apiconnector.dataFeatures(datasetId);
+		List<String> targetFeatures = new ArrayList<String>();
+		List<String> ignoreFeatures = new ArrayList<String>();
+		for (Feature f : dataFeatures.getFeatures()) {
+			if (f.getIs_ignore()) {
+				ignoreFeatures.add(f.getName());
+			}
+			if (f.getIs_target()) {
+				targetFeatures.add(f.getName());
+			}
+		}
+		
 		Instances dataset = new Instances(new FileReader(apiconnector.datasetGet(dsd)));
 		List<String> qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId).getQualityNames());
-		extractFeatures(dsd, dataset, qualitiesAvailable);
+		extractFeatures(dsd.getId(), dataset, targetFeatures, ignoreFeatures, dsd.getRow_id_attribute(), qualitiesAvailable);
 	}
 
-	private void extractFeatures(DataSetDescription dsd, Instances dataset, List<String> qualitiesAvailable) throws Exception {
-		Conversion.log("OK", "Extract Features", "Start extracting features for dataset: " + dsd.getId());
-
-		dataset.setClass(dataset.attribute(dsd.getDefault_target_attribute()));
-
+	private void extractFeatures(int did, Instances dataset, List<String> targetAttributes, List<String> ignoreAttributes, String rowIdAttribute, List<String> qualitiesAvailable) throws Exception {
+		Conversion.log("OK", "Extract Features", "Start extracting features for dataset: " + did);
+		
+		if (targetAttributes != null && targetAttributes.size() == 1) {
+			String targetAttribute = targetAttributes.get(0);
+			if (dataset.attribute(targetAttribute) == null) {
+				throw new Exception("Could not find target attribute: " + targetAttribute);
+			}
+			dataset.setClass(dataset.attribute(targetAttribute));
+		}
+		
 		// keeping the full dataset for attribute identification purposes
 		Instances fullDataset = new Instances(dataset);
 
-		if (dsd.getRow_id_attribute() != null) {
-			if (dataset.attribute(dsd.getRow_id_attribute()) != null) {
-				dataset.deleteAttributeAt(dataset.attribute(dsd.getRow_id_attribute()).index());
+		if (rowIdAttribute != null) {
+			if (dataset.attribute(rowIdAttribute) != null) {
+				dataset.deleteAttributeAt(dataset.attribute(rowIdAttribute).index());
 			}
 		}
-		if (dsd.getIgnore_attribute() != null) {
-			for (String att : dsd.getIgnore_attribute()) {
+		if (ignoreAttributes != null) {
+			for (String att : ignoreAttributes) {
 				if (dataset.attribute(att) != null) {
 					dataset.deleteAttributeAt(dataset.attribute(att).index());
 				}
@@ -116,9 +136,9 @@ public class FantailConnector {
 			for (int i = 0; i < dataset.numInstances(); i += window_size) {
 				if (apiconnector.getVerboselevel() >= Constants.VERBOSE_LEVEL_ARFF) {
 					Conversion.log("OK", "FantailConnector",
-							"Starting window [" + i + "," + (i + window_size) + "> (did = " + dsd.getId() + ",total size = " + dataset.numInstances() + ")");
+							"Starting window [" + i + "," + (i + window_size) + "> (did = " + did + ",total size = " + dataset.numInstances() + ")");
 				}
-				qualities.addAll(datasetCharacteristics(dataset, i, window_size, null, fullDataset, dsd));
+				qualities.addAll(datasetCharacteristics(dataset, i, window_size, null, fullDataset));
 
 				/*for (StreamCharacterizer sc : globalMetafeatures.getStreamCharacterizers()) {
 					// preventing nullpointer exception (if stream characterizer was already run)
@@ -130,7 +150,7 @@ public class FantailConnector {
 
 		} else {
 			Conversion.log("OK", "Extract Features", "Running Batch Characterizers (full data, might take a while)");
-			qualities.addAll(datasetCharacteristics(dataset, null, null, qualitiesAvailable, fullDataset, dsd));
+			qualities.addAll(datasetCharacteristics(dataset, null, null, qualitiesAvailable, fullDataset));
 			/*for (StreamCharacterizer sc : globalMetafeatures.getStreamCharacterizers()) {
 				Map<String, Double> streamqualities = sc.global();
 				if (streamqualities != null) {
@@ -140,9 +160,9 @@ public class FantailConnector {
 		}
 		Conversion.log("OK", "Extract Features", "Done generating features, start wrapping up");
 		if (qualities.size() > 0) {
-			DataQuality dq = new DataQuality(dsd.getId(), Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]));
+			DataQuality dq = new DataQuality(did, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]));
 			String strQualities = xstream.toXML(dq);
-			DataQualityUpload dqu = apiconnector.dataQualitiesUpload(Conversion.stringToTempFile(strQualities, "qualities_did_" + dsd.getId(), "xml"));
+			DataQualityUpload dqu = apiconnector.dataQualitiesUpload(Conversion.stringToTempFile(strQualities, "qualities_did_" + did, "xml"));
 			Conversion.log("OK", "Extract Features", "DONE: " + dqu.getDid());
 		} else {
 			Conversion.log("OK", "Extract Features", "DONE: Nothing to upload");
@@ -150,7 +170,7 @@ public class FantailConnector {
 	}
 
 	private List<Quality> datasetCharacteristics(Instances dataset, Integer start, Integer interval_size, List<String> qualitiesAvailable,
-			Instances fullDataset, DataSetDescription dsd) throws Exception {
+			Instances fullDataset) throws Exception {
 		List<Quality> result = new ArrayList<>();
 		Instances intervalData;
 
@@ -174,10 +194,6 @@ public class FantailConnector {
 			}
 		}
 		
-		// parallel computation of attribute meta-features
-		//AttributeMetafeatures attributeMetafeatures = new AttributeMetafeatures(dataset.numAttributes(), fullDataset, dsd);
-		//int threads = Runtime.getRuntime().availableProcessors();
-		//attributeMetafeatures.computeAndAppendAttributeMetafeatures(fullDataset, start, interval_size, threads, result);
 		return result;
 	}
 
