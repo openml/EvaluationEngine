@@ -3,7 +3,6 @@ package org.openml.webapplication;
 import java.io.BufferedReader;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.openml.apiconnector.algorithms.Conversion;
@@ -12,8 +11,6 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataFeatureUpload;
-import org.openml.apiconnector.xml.DataQuality;
-import org.openml.apiconnector.xml.DataQuality.Quality;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.DataUnprocessed;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
@@ -61,7 +58,7 @@ public class ProcessDataset {
 		String defaultTarget = dsd.getDefault_target_attribute();
 		
 		try {
-			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.all(null));
+			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
 			Instances dataset = new Instances(new BufferedReader(Input.getURL(datasetURL)));
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. " );
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);

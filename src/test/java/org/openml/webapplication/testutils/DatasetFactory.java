@@ -82,7 +82,7 @@ public class DatasetFactory {
 	}
 	
 	public static final Instances getXORNominalObfuscatedNoClass() {
-		// obfuscated version of xor: x1 xor x2 = y. Includes column with missing values
+		// obfuscated version of xor: x1 xor x2 = class. Includes column with missing values
 		List<String> values = new ArrayList<String>();
 		values.add("False");
 		values.add("True");
