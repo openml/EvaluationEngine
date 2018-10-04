@@ -1,4 +1,4 @@
-package org.openml.webapplication.characterizers;
+package org.openml.webapplication.fantail.characterizers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.Statistical;
+import org.openml.webapplication.testutils.DatasetFactory;
 
 import weka.core.Instances;
 

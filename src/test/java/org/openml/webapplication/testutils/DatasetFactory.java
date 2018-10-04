@@ -1,4 +1,4 @@
-package org.openml.webapplication.characterizers;
+package org.openml.webapplication.testutils;
 
 import java.util.ArrayList;
 import java.util.List;
