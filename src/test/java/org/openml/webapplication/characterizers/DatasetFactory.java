@@ -1,4 +1,4 @@
-package webapplication;
+package org.openml.webapplication.characterizers;
 
 import java.util.ArrayList;
 import java.util.List;

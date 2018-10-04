@@ -1,4 +1,4 @@
-package webapplication;
+package org.openml.webapplication.characterizers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -9,43 +9,42 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
-import org.openml.webapplication.fantail.dc.statistical.NominalAttDistinctValues;
+import org.openml.webapplication.fantail.dc.landmarking.GenericLandmarker;
 
 import weka.core.Instances;
 
-public class TestNominalAttDistinctValuesCharacterizer {
+public class TestGenericLandmarkerCharacterizer {
 	
-	private static final Characterizer characterizer = new NominalAttDistinctValues();
+	private static final Characterizer characterizer = new GenericLandmarker("DecisionStump", "weka.classifiers.trees.DecisionStump", 2, null);
 	
 	private static final Map<String, Double> getXORNumericExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MaxNominalAttDistinctValues", null);
-		results.put("MinNominalAttDistinctValues", null);
-		results.put("MeanNominalAttDistinctValues", null);
-		results.put("StdvNominalAttDistinctValues", null);
+		results.put("DecisionStumpAUC", null);
+		results.put("DecisionStumpErrRate", null);
+		results.put("DecisionStumpKappa", null);
 		return results;
 	}
 	
 	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MaxNominalAttDistinctValues", 2.0);
-		results.put("MinNominalAttDistinctValues", 2.0);
-		results.put("MeanNominalAttDistinctValues", 2.0);
-		results.put("StdvNominalAttDistinctValues", 0.0);
+		// If the decision stump tries to learn on a stratified fold, it will always fail. 
+		results.put("DecisionStumpAUC", 0.0);
+		results.put("DecisionStumpErrRate", 1.0);
+		results.put("DecisionStumpKappa", -1.0);
 		return results;
 	}
 	
 	private static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MaxNominalAttDistinctValues", 2.0);
-		results.put("MinNominalAttDistinctValues", 0.0);
-		results.put("MeanNominalAttDistinctValues", 1.5);
-		results.put("StdvNominalAttDistinctValues", 1.0);
+		// If the decision stump tries to learn on a stratified fold, it will always fail. 
+		results.put("DecisionStumpAUC", 0.0);
+		results.put("DecisionStumpErrRate", 1.0);
+		results.put("DecisionStumpKappa", -1.0);
 		return results;
 	}
 	
 	@Test
-	public void testNominalAttDistinctValuesFeaturesXorNumeric() throws Exception {
+	public void testLandmarkerXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
@@ -58,11 +57,11 @@ public class TestNominalAttDistinctValuesCharacterizer {
 		
 		assertEquals(0, mismatches.size());
 	}
-
+	
 	@Test
-	public void testNominalAttDistinctValuesFeaturesXorNumericNoClass() throws Exception {
+	public void testLandmarkerXorNumericNoClass() throws Exception {
 		Instances xor = DatasetFactory.getXORNumericNoClass();
-		// results are currently the same as vanilla numerical results
+		// results currently the same as vanilla numeric
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
@@ -76,7 +75,7 @@ public class TestNominalAttDistinctValuesCharacterizer {
 	}
 	
 	@Test
-	public void testNominalAttDistinctValuesXorNominal() throws Exception {
+	public void testLandmarkerXorNominal() throws Exception {
 		Instances xor = DatasetFactory.getXORNominal();
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
@@ -91,7 +90,7 @@ public class TestNominalAttDistinctValuesCharacterizer {
 	}
 
 	@Test
-	public void testNominalAttDistinctValuesXorNominalObfuscated() throws Exception {
+	public void testLandmarkerXorNominalObfuscated() throws Exception {
 		Instances xor = DatasetFactory.getXORNominalObfuscated();
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		

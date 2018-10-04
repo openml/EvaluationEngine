@@ -1,6 +1,7 @@
-package webapplication;
+package org.openml.webapplication.characterizers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Map;
@@ -8,64 +9,43 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
-import org.openml.webapplication.fantail.dc.statistical.Cardinality;
+import org.openml.webapplication.fantail.dc.statistical.NominalAttDistinctValues;
 
 import weka.core.Instances;
 
-public class TestCardinalityCharacterizer {
-
-	private static final Characterizer characterizer = new Cardinality();
+public class TestNominalAttDistinctValuesCharacterizer {
+	
+	private static final Characterizer characterizer = new NominalAttDistinctValues();
 	
 	private static final Map<String, Double> getXORNumericExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MeanCardinalityOfNumericAttributes", 2.0);
-		results.put("StdevCardinalityOfNumericAttributes", 0.0);
-		results.put("MinCardinalityOfNumericAttributes", 2.0);
-		results.put("MaxCardinalityOfNumericAttributes", 2.0);
-		results.put("MeanCardinalityOfNominalAttributes", null);
-		results.put("StdevCardinalityOfNominalAttributes", null);
-		results.put("MinCardinalityOfNominalAttributes", null);
-		results.put("MaxCardinalityOfNominalAttributes", null);
-		results.put("CardinalityAtTwo", 4.0);
-		results.put("CardinalityAtThree", 8.0);
-		results.put("CardinalityAtFour", null);
+		results.put("MaxNominalAttDistinctValues", null);
+		results.put("MinNominalAttDistinctValues", null);
+		results.put("MeanNominalAttDistinctValues", null);
+		results.put("StdvNominalAttDistinctValues", null);
 		return results;
 	}
 	
 	private static final Map<String, Double> getXORNominalExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MeanCardinalityOfNumericAttributes", null);
-		results.put("StdevCardinalityOfNumericAttributes", null);
-		results.put("MinCardinalityOfNumericAttributes", null);
-		results.put("MaxCardinalityOfNumericAttributes", null);
-		results.put("MeanCardinalityOfNominalAttributes", 2.0);
-		results.put("StdevCardinalityOfNominalAttributes", 0.0);
-		results.put("MinCardinalityOfNominalAttributes", 2.0);
-		results.put("MaxCardinalityOfNominalAttributes", 2.0);
-		results.put("CardinalityAtTwo", 4.0);
-		results.put("CardinalityAtThree", 8.0);
-		results.put("CardinalityAtFour", null);
+		results.put("MaxNominalAttDistinctValues", 2.0);
+		results.put("MinNominalAttDistinctValues", 2.0);
+		results.put("MeanNominalAttDistinctValues", 2.0);
+		results.put("StdvNominalAttDistinctValues", 0.0);
 		return results;
 	}
 	
 	private static final Map<String, Double> getXORNominalObfuscatedExpectedResults() {
 		Map<String, Double> results = new TreeMap<String, Double>();
-		results.put("MeanCardinalityOfNumericAttributes", null);
-		results.put("StdevCardinalityOfNumericAttributes", null);
-		results.put("MinCardinalityOfNumericAttributes", null);
-		results.put("MaxCardinalityOfNumericAttributes", null);
-		results.put("MeanCardinalityOfNominalAttributes", 1.5);
-		results.put("StdevCardinalityOfNominalAttributes", 1.0);
-		results.put("MinCardinalityOfNominalAttributes", 0.0);
-		results.put("MaxCardinalityOfNominalAttributes", 2.0);
-		results.put("CardinalityAtTwo", 4.0);
-		results.put("CardinalityAtThree", 8.0);
-		results.put("CardinalityAtFour", 8.0);
+		results.put("MaxNominalAttDistinctValues", 2.0);
+		results.put("MinNominalAttDistinctValues", 0.0);
+		results.put("MeanNominalAttDistinctValues", 1.5);
+		results.put("StdvNominalAttDistinctValues", 1.0);
 		return results;
 	}
 	
 	@Test
-	public void testCardinalityXorNumeric() throws Exception {
+	public void testNominalAttDistinctValuesFeaturesXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
@@ -78,11 +58,11 @@ public class TestCardinalityCharacterizer {
 		
 		assertEquals(0, mismatches.size());
 	}
-	
+
 	@Test
-	public void testCardinalityXorNumericNoClass() throws Exception {
+	public void testNominalAttDistinctValuesFeaturesXorNumericNoClass() throws Exception {
 		Instances xor = DatasetFactory.getXORNumericNoClass();
-		// results currently the same as vanilla numeric
+		// results are currently the same as vanilla numerical results
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
@@ -96,7 +76,7 @@ public class TestCardinalityCharacterizer {
 	}
 	
 	@Test
-	public void testCardinalityXorNominal() throws Exception {
+	public void testNominalAttDistinctValuesXorNominal() throws Exception {
 		Instances xor = DatasetFactory.getXORNominal();
 		Map<String, Double> expectedResults = getXORNominalExpectedResults();
 		
@@ -111,7 +91,7 @@ public class TestCardinalityCharacterizer {
 	}
 
 	@Test
-	public void testCardinalityXorNominalObfuscated() throws Exception {
+	public void testNominalAttDistinctValuesXorNominalObfuscated() throws Exception {
 		Instances xor = DatasetFactory.getXORNominalObfuscated();
 		Map<String, Double> expectedResults = getXORNominalObfuscatedExpectedResults();
 		
