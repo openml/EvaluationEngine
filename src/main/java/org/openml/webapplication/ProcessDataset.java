@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
+import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
@@ -63,26 +64,33 @@ public class ProcessDataset {
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. " );
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
-			
 			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
 			apiconnector.dataFeaturesUpload(dataFeatureFile);
 			
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining basic qualities. " );
 			fantail.computeMetafeatures(did);
-			
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
+		} catch(ApiException e) {
+			if (e.getCode() == 431) {
+				// dataset already processed
+				Conversion.log("Notice", "Process Dataset", e.getMessage());
+			} else {
+				e.printStackTrace();
+				processDatasetWithError(did, e.getMessage());
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, e.getMessage());
-			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
-			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload( dataFeatureFile );
-			Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + e.getMessage());
-		} catch (OutOfMemoryError oome) {
-		    // move on
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, oome.getMessage());
-			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
-			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
-			Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + oome.getMessage());
+			processDatasetWithError(did, e.getMessage());
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			processDatasetWithError(did, e.getMessage());
 		}
+	}
+	
+	private void processDatasetWithError(int did, String errorMessage) throws Exception {
+		DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, errorMessage);
+		File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
+		DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
+		Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + errorMessage);
 	}
 }
