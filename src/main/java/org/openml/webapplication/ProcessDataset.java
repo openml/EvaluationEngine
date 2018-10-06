@@ -88,6 +88,7 @@ public class ProcessDataset {
 	}
 	
 	private void processDatasetWithError(int did, String errorMessage) throws Exception {
+		Conversion.log("Error", "Process Dataset", "Error while processing dataset. Marking this in database.");
 		DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, errorMessage);
 		File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
 		DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
