@@ -124,7 +124,11 @@ public class Main {
 					FantailConnector fc = new FantailConnector(apiconnector, CharacterizerFactory.all(null));
 					fc.start(id, mode, cli.getOptionValue("tag"), null);
 					fc.toString();
-					
+				} else if( function.equals("extract_features_simple") ) {
+					String mode = cli.hasOption("x") ? "random" : "normal";
+					FantailConnector fc = new FantailConnector(apiconnector, CharacterizerFactory.simple());
+					fc.start(id, mode, cli.getOptionValue("tag"), null);
+					fc.toString();
 				} else if( function.equals("generate_folds") ) {
 					URL datasetUrl;
 					String target_feature;
