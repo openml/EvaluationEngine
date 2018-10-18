@@ -1,4 +1,4 @@
-package webapplication;
+package org.openml.webapplication.fantail.characterizers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
+import org.openml.webapplication.testutils.DatasetFactory;
 
 import weka.core.Instances;
 
@@ -38,6 +39,30 @@ public class TestSimpleMetaFeaturesCharacterizer {
 		results.put("MajorityClassPercentage", null);
 		results.put("MinorityClassPercentage", null);
 		results.put("AutoCorrelation", 1.0 / 3.0);
+		return results;
+	}
+	
+	private static final Map<String, Double> getXORNumericNoClassExpectedResults() {
+		Map<String, Double> results = new TreeMap<String, Double>();
+		results.put("NumberOfInstances", 4.0);
+		results.put("NumberOfFeatures", 3.0);
+		results.put("NumberOfClasses", null);
+		results.put("Dimensionality", 0.75);
+		results.put("NumberOfInstancesWithMissingValues", 0.0); 
+		results.put("NumberOfMissingValues", 0.0);
+		results.put("PercentageOfInstancesWithMissingValues", 0.0);
+		results.put("PercentageOfMissingValues", 0.0);
+		results.put("NumberOfNumericFeatures", 3.0);
+		results.put("NumberOfSymbolicFeatures", 0.0);
+		results.put("NumberOfBinaryFeatures", 0.0); 
+		results.put("PercentageOfNumericFeatures", 100.0);
+		results.put("PercentageOfSymbolicFeatures", 0.0);
+		results.put("PercentageOfBinaryFeatures", 0.0);
+		results.put("MajorityClassSize", null);
+		results.put("MinorityClassSize", null);
+		results.put("MajorityClassPercentage", null);
+		results.put("MinorityClassPercentage", null);
+		results.put("AutoCorrelation", null);
 		return results;
 	}
 	
@@ -93,6 +118,19 @@ public class TestSimpleMetaFeaturesCharacterizer {
 	public void testSimpleFeaturesXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+	}
+	
+	@Test
+	public void testSimpleFeaturesXorNumericNoClass() throws Exception {
+		Instances xor = DatasetFactory.getXORNumericNoClass();
+		Map<String, Double> expectedResults = getXORNumericNoClassExpectedResults();
 		
 		// Check the produced class count
 		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);

@@ -1,4 +1,4 @@
-package webapplication;
+package org.openml.webapplication.testutils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +9,13 @@ import weka.core.DenseInstance;
 import weka.core.Instances;
 
 public class DatasetFactory {
-
-	public static final Instances getXORNumeric() {
+	
+	public static final Instances getXORNumericNoClass() {
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(new Attribute("x1"));
 		attributes.add(new Attribute("x2"));
 		attributes.add(new Attribute("y"));
 		Instances xorDataset = new Instances("XorNumeric", attributes , 0);
-		xorDataset.setClassIndex(xorDataset.numAttributes() - 1);
 
 		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 0.0, 0.0}));
 		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 1.0, 1.0}));
@@ -26,8 +25,13 @@ public class DatasetFactory {
 		return xorDataset;
 	}
 	
-
-	public static final Instances getXORMixed() {
+	public static final Instances getXORNumeric() {
+		Instances xorDataset = getXORNumericNoClass();
+		xorDataset.setClassIndex(xorDataset.numAttributes() - 1);
+		return xorDataset;
+	}
+	
+	public static final Instances getXORMixedNoClass() {
 		List<String> values = new ArrayList<String>();
 		values.add("False");
 		values.add("True");
@@ -37,7 +41,31 @@ public class DatasetFactory {
 		attributes.add(new Attribute("x2"));
 		attributes.add(new Attribute("y", values));
 		Instances xorDataset = new Instances("XorMixed", attributes , 0);
+
+		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 0.0, 0.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 1.0, 1.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 0.0, 1.0}));
+		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 1.0, 0.0}));
+		
+		return xorDataset;
+	}
+	
+	public static final Instances getXORMixed() {
+		Instances xorDataset = getXORMixedNoClass();
 		xorDataset.setClassIndex(xorDataset.numAttributes() - 1);
+		return xorDataset;
+	}
+	
+	public static final Instances getXORNominalNoClass() {
+		List<String> values = new ArrayList<String>();
+		values.add("False");
+		values.add("True");
+		
+		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+		attributes.add(new Attribute("x1", values));
+		attributes.add(new Attribute("x2", values));
+		attributes.add(new Attribute("class", values));
+		Instances xorDataset = new Instances("XorNominal", attributes , 4);
 
 		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 0.0, 0.0}));
 		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 1.0, 1.0}));
@@ -48,27 +76,13 @@ public class DatasetFactory {
 	}
 	
 	public static final Instances getXORNominal() {
-		List<String> values = new ArrayList<String>();
-		values.add("False");
-		values.add("True");
-		
-		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-		attributes.add(new Attribute("x1", values));
-		attributes.add(new Attribute("x2", values));
-		attributes.add(new Attribute("class", values));
-		Instances xorDataset = new Instances("XorNominal", attributes , 4);
+		Instances xorDataset = getXORNominalNoClass();
 		xorDataset.setClassIndex(xorDataset.numAttributes() - 1);
-
-		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 0.0, 0.0}));
-		xorDataset.add(new DenseInstance(1.0, new double[] {0.0, 1.0, 1.0}));
-		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 0.0, 1.0}));
-		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 1.0, 0.0}));
-		
 		return xorDataset;
 	}
 	
-	public static final Instances getXORNominalObfuscated() {
-		// obfuscated version of xor: x1 xor x2 = y. Includes column with missing values
+	public static final Instances getXORNominalObfuscatedNoClass() {
+		// obfuscated version of xor: x1 xor x2 = class. Includes column with missing values
 		List<String> values = new ArrayList<String>();
 		values.add("False");
 		values.add("True");
@@ -92,6 +106,12 @@ public class DatasetFactory {
 		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 0.0, Double.NaN, 1.0}));
 		xorDataset.add(new DenseInstance(1.0, new double[] {1.0, 1.0, Double.NaN, 0.0}));
 		
+		return xorDataset;
+	}
+	
+	public static final Instances getXORNominalObfuscated() {
+		Instances xorDataset = getXORNominalObfuscatedNoClass();
+		xorDataset.setClassIndex(xorDataset.numAttributes() - 1);
 		return xorDataset;
 	}
 	

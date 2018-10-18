@@ -36,6 +36,7 @@ import org.openml.apiconnector.settings.Settings;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
+import org.openml.webapplication.features.CharacterizerFactory;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.generatefolds.ChallengeSets;
 import org.openml.webapplication.generatefolds.GenerateFolds;
@@ -117,20 +118,19 @@ public class Main {
 					// bootstrap process dataset
 					String processMode = cli.hasOption("x") ? "random" : "normal";
 					new ProcessDataset(apiconnector, id, processMode);
-				} else if( function.equals("extract_features_all") ) {
 					
+				} else if( function.equals("extract_features_all") ) {
 					String mode = cli.hasOption("x") ? "random" : "normal";
-					FantailConnector fc = new FantailConnector( apiconnector, id, mode, cli.getOptionValue("tag"), null);
+					FantailConnector fc = new FantailConnector(apiconnector, CharacterizerFactory.all(null));
+					fc.start(id, mode, cli.getOptionValue("tag"), null);
 					fc.toString();
 					
 				} else if( function.equals("generate_folds") ) {
-					
 					URL datasetUrl;
 					String target_feature;
 					String estimation_procedure;
 					String custum_testset = null; 
 					String datasetName;
-					
 					
 					if(cli.hasOption("id")) {
 						id = Integer.parseInt(cli.getOptionValue("id"));

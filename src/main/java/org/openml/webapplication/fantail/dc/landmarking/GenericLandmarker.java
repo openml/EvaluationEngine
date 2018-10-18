@@ -7,6 +7,7 @@ import org.openml.webapplication.fantail.dc.Characterizer;
 
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
+import weka.core.UnassignedClassException;
 
 public class GenericLandmarker extends Characterizer {
 	private static final String[] measures = { "AUC", "ErrRate", "Kappa" };
@@ -48,6 +49,11 @@ public class GenericLandmarker extends Characterizer {
 			results.put(landmarkerName + "AUC", eval.weightedAreaUnderROC());
 			results.put(landmarkerName + "ErrRate", eval.errorRate());
 			results.put(landmarkerName + "Kappa", eval.kappa());
+		} catch (UnassignedClassException e) {
+			e.printStackTrace();
+			results.put(landmarkerName + "AUC", null);
+			results.put(landmarkerName + "ErrRate", null);
+			results.put(landmarkerName + "Kappa", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			results.put(landmarkerName + "AUC", null);

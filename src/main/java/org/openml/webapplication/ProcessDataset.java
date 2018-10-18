@@ -3,21 +3,21 @@ package org.openml.webapplication;
 import java.io.BufferedReader;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
+import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataFeatureUpload;
-import org.openml.apiconnector.xml.DataQuality;
-import org.openml.apiconnector.xml.DataQuality.Quality;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.DataUnprocessed;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
+import org.openml.webapplication.features.CharacterizerFactory;
 import org.openml.webapplication.features.ExtractFeatures;
+import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.settings.Settings;
 
 import weka.core.Instances;
@@ -52,16 +52,6 @@ public class ProcessDataset {
 		}
 	}
 	
-	public List<String> nominalInComplete(List<Feature> features) {
-		List<String> nominalIncomplete = new ArrayList<String>();
-		for (Feature f : features) {
-			if(f.getDataType().equals("nominal") && f.getNominalValues() == null) {
-				nominalIncomplete.add(f.getName());
-			}
-		}
-		return nominalIncomplete;
-	}
-	
 	public void process(Integer did) throws Exception {
 
 		DataSetDescription dsd = apiconnector.dataGet(did);
@@ -69,40 +59,39 @@ public class ProcessDataset {
 		String defaultTarget = dsd.getDefault_target_attribute();
 		
 		try {
-			
+			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
 			Instances dataset = new Instances(new BufferedReader(Input.getURL(datasetURL)));
-			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining basic qualities. " );
-			List<Quality> qualities = ExtractFeatures.getQualities(dataset,defaultTarget);
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. " );
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
-			String dataFeatureError = null;
-			List<String> nominalIncomplete = nominalInComplete(features);
-			if (nominalIncomplete.size() > 0) {
-				dataFeatureError = "\"Nominal values length exceeds max allowed size (" + ExtractFeatures.MAX_SIZE_NOMINAL_VALUES + 
-								   ") for feature(s): " + nominalIncomplete.toString();
-			}
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]), dataFeatureError);
-			
+			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
 			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
 			apiconnector.dataFeaturesUpload(dataFeatureFile);
 			
-			DataQuality dataquality = new DataQuality(did, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]) );
-			File dataQualityFile = Conversion.stringToTempFile(xstream.toXML(dataquality), "qualities-did" + did, "xml");
-			apiconnector.dataQualitiesUpload(dataQualityFile);
-			
+			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining basic qualities. " );
+			fantail.computeMetafeatures(did);
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
+		} catch(ApiException e) {
+			if (e.getCode() == 431) {
+				// dataset already processed
+				Conversion.log("Notice", "Process Dataset", e.getMessage());
+			} else {
+				e.printStackTrace();
+				processDatasetWithError(did, e.getMessage());
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, e.getMessage());
-			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
-			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload( dataFeatureFile );
-			Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + e.getMessage());
-		} catch (OutOfMemoryError oome) {
-		    // move on
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, oome.getMessage());
-			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
-			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
-			Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + oome.getMessage());
+			processDatasetWithError(did, e.getMessage());
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			processDatasetWithError(did, e.getMessage());
 		}
+	}
+	
+	private void processDatasetWithError(int did, String errorMessage) throws Exception {
+		Conversion.log("Error", "Process Dataset", "Error while processing dataset. Marking this in database.");
+		DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, errorMessage);
+		File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-error-did" + did, "xml");
+		DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
+		Conversion.log("Error", "Process Dataset", "Dataset " + dfu.getDid() + " - Error: " + errorMessage);
 	}
 }

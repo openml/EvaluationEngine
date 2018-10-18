@@ -1,4 +1,4 @@
-package webapplication;
+package org.openml.webapplication.fantail.characterizers;
 
 import static org.junit.Assert.*;
 
@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import org.junit.Test;
 import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.fantail.dc.statistical.Cardinality;
+import org.openml.webapplication.testutils.DatasetFactory;
 
 import weka.core.Instances;
 
@@ -67,6 +68,22 @@ public class TestCardinalityCharacterizer {
 	@Test
 	public void testCardinalityXorNumeric() throws Exception {
 		Instances xor = DatasetFactory.getXORNumeric();
+		Map<String, Double> expectedResults = getXORNumericExpectedResults();
+		
+		// Check the produced class count
+		Map<String,Double> metafeatures = characterizer.characterizeAll(xor);
+		List<String> mismatches = DatasetFactory.differences(expectedResults, metafeatures);
+		if (mismatches.size() != 0) {
+			fail("Mismatches (" + mismatches.size() + "): " + mismatches.toString());
+		}
+		
+		assertEquals(0, mismatches.size());
+	}
+	
+	@Test
+	public void testCardinalityXorNumericNoClass() throws Exception {
+		Instances xor = DatasetFactory.getXORNumericNoClass();
+		// results currently the same as vanilla numeric
 		Map<String, Double> expectedResults = getXORNumericExpectedResults();
 		
 		// Check the produced class count
