@@ -23,6 +23,7 @@ import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.RunEvaluate;
 import org.openml.apiconnector.xml.RunEvaluation;
+import org.openml.apiconnector.xml.RunList;
 import org.openml.apiconnector.xml.RunTrace;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
@@ -32,6 +33,7 @@ import org.openml.webapplication.evaluate.EvaluateBatchPredictions;
 import org.openml.webapplication.evaluate.EvaluateStreamPredictions;
 import org.openml.webapplication.evaluate.EvaluateSurvivalAnalysisPredictions;
 import org.openml.webapplication.evaluate.PredictionEvaluator;
+import org.openml.webapplication.settings.ApiErrorMapping;
 import org.openml.webapplication.settings.Settings;
 
 import weka.core.Instance;
@@ -53,7 +55,7 @@ public class EvaluateRun {
 		apiconnector = ac;
 		xstream = XstreamXmlMapping.getInstance();
 		if(run_id != null) {
-			evaluate( run_id );
+			evaluate(run_id);
 		} else {
 			try {
 				// while loop will be broken when when there are no runs left on server (catch)
@@ -72,14 +74,25 @@ public class EvaluateRun {
 					filters.put("uploader", "" + uploaderId);
 				}
 				
+				// this is the loop that keeps the evaluation engine getting new unevaluated runs
 				while(true) {
-					EvaluationRequest er = ac.evaluationRequest(1, evaluationMode, filters);
-					run_id = er.getRuns()[0].getRun_id();
-					Conversion.log("INFO","Evaluate Run","Downloading task " + run_id );
-					evaluate( run_id );
+					int numRequests = 1000; // this number must be high to keep the evaluation engine fast
+					EvaluationRequest er = ac.evaluationRequest(Settings.EVALUATION_ENGINE_ID, evaluationMode, numRequests, filters);
+					Conversion.log("INFO", "Evaluate Run", "Obtained " + er.getRuns().length + " unevaluated runs");
+					
+					// this loops over the unevaluated runs that we obtained with the evaluation request.
+					for (RunList.Run r : er.getRuns()) {
+						run_id = r.getRun_id();
+						Conversion.log("INFO", "Evaluate Run", "Downloading run " + run_id);
+						evaluate(run_id);
+					}
 				}
 			} catch(ApiException e) {
-				Conversion.log( "OK", "Process Run", "No more runs to evaluate. Api response: " + e.getMessage());
+				if (e.getCode() == ApiErrorMapping.NO_UNEVALUATED_RUNS) {
+					Conversion.log( "OK", "Process Run", "No more runs to evaluate. Api response: " + e.getMessage());
+				} else {
+					throw e;
+				}
 			}
 		}
 	}
