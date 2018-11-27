@@ -65,9 +65,9 @@ public class ProcessDataset {
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
 			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
-			apiconnector.dataFeaturesUpload(dataFeatureFile);
+			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
 			
-			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining basic qualities. " );
+			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dfu.getDid() + " - obtaining basic qualities. " );
 			fantail.computeMetafeatures(did);
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
 		} catch(ApiException e) {

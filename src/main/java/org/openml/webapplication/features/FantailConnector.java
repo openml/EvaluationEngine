@@ -21,6 +21,7 @@ package org.openml.webapplication.features;
 
 import com.thoughtworks.xstream.XStream;
 import org.openml.apiconnector.algorithms.Conversion;
+import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataFeature;
@@ -90,7 +91,16 @@ public class FantailConnector {
 		}
 		
 		Instances dataset = new Instances(new FileReader(apiconnector.datasetGet(dsd)));
-		List<String> qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId).getQualityNames());
+		List<String> qualitiesAvailable = new ArrayList<String>();
+		try {
+			qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId).getQualityNames());
+		} catch(ApiException ae) {
+			if (ae.getCode() != 362) {
+				throw ae;
+			} else {
+				// this is fine. (just no qualities available)
+			}
+		}
 		Set<Quality> qualities = extractFeatures(dsd.getId(), dataset, targetFeatures, ignoreFeatures, dsd.getRow_id_attribute(), qualitiesAvailable);
 		
 		// now upload the qualitues
