@@ -9,6 +9,7 @@ import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataFeatureUpload;
@@ -61,11 +62,14 @@ public class ProcessDataset {
 		try {
 			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
 			Instances dataset = new Instances(new BufferedReader(Input.getURL(datasetURL)));
-			Conversion.log( "OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. " );
+			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
 			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
 			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
+			if (dsd.getStatus() == Constants.DATA_STATUS_PREP) {
+				apiconnector.dataStatusUpdate(did, Constants.DATA_STATUS_ACTIVE);
+			}
 			
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dfu.getDid() + " - obtaining basic qualities. " );
 			fantail.computeMetafeatures(did);
