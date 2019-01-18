@@ -33,6 +33,7 @@ import org.openml.webapplication.evaluate.EvaluateBatchPredictions;
 import org.openml.webapplication.evaluate.EvaluateStreamPredictions;
 import org.openml.webapplication.evaluate.EvaluateSurvivalAnalysisPredictions;
 import org.openml.webapplication.evaluate.PredictionEvaluator;
+import org.openml.webapplication.evaluate.TaskType;
 import org.openml.webapplication.settings.ApiErrorMapping;
 import org.openml.webapplication.settings.Settings;
 
@@ -158,11 +159,26 @@ public class EvaluateRun {
 				URL predictionsUrl = apiconnector.getOpenmlFileUrl(runFiles.get("predictions").getFileId(), filename_prefix + "predictions.arff");
 				URL splitsUrl = estimationprocedure.getData_splits_url();
 				predictionEvaluator = new EvaluateSurvivalAnalysisPredictions(task, datasetUrl, splitsUrl, predictionsUrl);
-			} else {
+			} else if (task.getTask_type_id() == 2) {
 				predictionEvaluator = new EvaluateBatchPredictions( 
 					apiconnector,
 					task,
+					TaskType.REGRESSION,
 					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+			} else if (task.getTask_type_id() == 3) {
+				predictionEvaluator = new EvaluateBatchPredictions( 
+					apiconnector,
+					task,
+					TaskType.LEARNINGCURVE,
+					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+			} else if (task.getTask_type_id() == 1 || task.getTask_type_id() == 5 || task.getTask_type_id() == 6 || task.getTask_type_id() == 8) {
+				predictionEvaluator = new EvaluateBatchPredictions( 
+					apiconnector,
+					task,
+					TaskType.CLASSIFICATION,
+					apiconnector.getOpenmlFileUrl(runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+			} else {
+				throw new Exception("Unsupported Task Type: " + task.getTask_type_id());
 			}
 			runevaluation.addEvaluationMeasures(predictionEvaluator.getEvaluationScores());
 			
