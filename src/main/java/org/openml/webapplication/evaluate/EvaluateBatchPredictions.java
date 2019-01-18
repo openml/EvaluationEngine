@@ -74,9 +74,10 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private EvaluationScore[] evaluationScores;
 
-	public EvaluateBatchPredictions(OpenmlConnector openml, Task task, URL predictionsPath) throws Exception {
+	public EvaluateBatchPredictions(OpenmlConnector openml, Task task, TaskType taskType, URL predictionsPath) throws Exception {
 		final int datasetId = TaskInformation.getSourceData(task).getData_set_id();
 		DataSetDescription dsd = openml.dataGet(datasetId);
+		this.taskType = taskType;
 		
 		// set all arff files needed for this operation.
 		URL datasetPath = openml.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName());
@@ -102,18 +103,6 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 			dataset.setClass(dataset.attribute(classAttribute));
 		} else {
 			throw new RuntimeException("Class attribute (" + classAttribute + ") not found");
-		}
-
-		// ... and specify which task we are doing. classification or
-		// regression.
-		if (dataset.classAttribute().isNominal()) {
-			if (predictions.attribute("sample") == null) {
-				taskType = TaskType.CLASSIFICATION;
-			} else {
-				taskType = TaskType.LEARNINGCURVE;
-			}
-		} else {
-			taskType = TaskType.REGRESSION;
 		}
 
 		// initiate a class that will help us with checking the prediction
