@@ -228,28 +228,34 @@ public class EvaluateRun {
 			Conversion.log( "Warning", "Process Run", "Unexpected error, will proceed with upload process: " + e.getMessage() );
 			runevaluation.setError(e.getMessage(), MAX_LENGTH_WARNING);
 		}
-
 		
-		
-		Conversion.log( "OK", "Process Run", "Start uploading results ... " );
+		Conversion.log("OK", "Process Run", "Start uploading results ... ");
 		try {
 			String runEvaluation = xstream.toXML(runevaluation);
-			//System.out.println(runEvaluation);
-			File evaluationFile = Conversion.stringToTempFile( runEvaluation, "run_" + runId + "evaluations", "xml" );
-			//apiconnector.setVerboseLevel(1);
-			RunEvaluate re = apiconnector.runEvaluate( evaluationFile );
-			
+			// System.out.println(runEvaluation);
+			File evaluationFile = Conversion.stringToTempFile(runEvaluation, "run_" + runId + "evaluations", "xml");
+			// apiconnector.setVerboseLevel(1);
+			RunEvaluate re = apiconnector.runEvaluate(evaluationFile);
+
 			if (trace != null) {
-				String runTrace = xstream.toXML( trace );
-				//System.out.println(runTrace);
-				File traceFile = Conversion.stringToTempFile( runTrace, "run_" + runId + "trace", "xml" );
-				
+				String runTrace = xstream.toXML(trace);
+				// System.out.println(runTrace);
+				File traceFile = Conversion.stringToTempFile(runTrace, "run_" + runId + "trace", "xml");
+
 				apiconnector.runTraceUpload(traceFile);
 			}
-			
-			Conversion.log( "OK", "Process Run", "Run processed: " + re.getRun_id() );
-		} catch( Exception  e ) {
-			Conversion.log( "ERROR", "Process Run", "An error occured during API call: " + e.getMessage() );
+
+			Conversion.log("OK", "Process Run", "Run processed: " + re.getRun_id());
+		} catch (ApiException e) {
+			Conversion.log("ERROR", "Process Run", "An error occured during API call: " + e.getMessage());
+			RunEvaluation errorEvaluation = new RunEvaluation(runId, Settings.EVALUATION_ENGINE_ID);
+			errorEvaluation.setError(e.getMessage(), MAX_LENGTH_WARNING);
+			File errorEvaluationFile = Conversion.stringToTempFile(xstream.toXML(errorEvaluation), "run_" + runId + "evaluations", "xml");
+			// apiconnector.setVerboseLevel(1);
+			apiconnector.runEvaluate(errorEvaluationFile);
+			Conversion.log("ERROR", "Process Run", "Processed run with error message. ");
+		} catch (Exception e) {
+			Conversion.log("ERROR", "Process Run", "An error occured during API call: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
