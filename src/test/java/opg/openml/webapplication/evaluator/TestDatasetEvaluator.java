@@ -1,8 +1,8 @@
 package opg.openml.webapplication.evaluator;
 
-import java.io.File;
-
 import static org.junit.Assert.*;
+
+import java.io.File;
 
 import org.junit.Test;
 import org.openml.apiconnector.algorithms.Conversion;
