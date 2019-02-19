@@ -67,7 +67,8 @@ public class ProcessDataset {
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
 			File dataFeatureFile = Conversion.stringToTempFile(xstream.toXML(datafeature), "features-did" + did, "xml");
 			DataFeatureUpload dfu = apiconnector.dataFeaturesUpload(dataFeatureFile);
-			if (dsd.getStatus() == Constants.DATA_STATUS_PREP) {
+			
+			if (dsd.getStatus().equals(Constants.DATA_STATUS_PREP)) {
 				apiconnector.dataStatusUpdate(did, Constants.DATA_STATUS_ACTIVE);
 			}
 			
