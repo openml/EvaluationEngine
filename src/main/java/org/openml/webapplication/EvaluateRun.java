@@ -23,7 +23,6 @@ import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.RunEvaluate;
 import org.openml.apiconnector.xml.RunEvaluation;
-import org.openml.apiconnector.xml.RunList;
 import org.openml.apiconnector.xml.RunTrace;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
@@ -82,7 +81,7 @@ public class EvaluateRun {
 					Conversion.log("INFO", "Evaluate Run", "Obtained " + er.getRuns().length + " unevaluated runs");
 					
 					// this loops over the unevaluated runs that we obtained with the evaluation request.
-					for (RunList.Run r : er.getRuns()) {
+					for (Run r : er.getRuns()) {
 						run_id = r.getRun_id();
 						Conversion.log("INFO", "Evaluate Run", "Downloading run " + run_id);
 						evaluate(run_id);
