@@ -19,6 +19,7 @@
  */
 package org.openml.webapplication.evaluate;
 
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,10 +29,10 @@ import java.util.TreeMap;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.DateParser;
-import org.openml.apiconnector.algorithms.MathHelper;
 import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.models.MetricScore;
+import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Run;
@@ -74,9 +75,10 @@ public class EvaluateStreamChallenge implements PredictionEvaluator {
 		competitionStartTime = DateParser.unixTimestamp(schedule.getStart_time());
 		DataSetDescription dsd = connector.dataGet(ds.getData_set_id());
 		
-		Conversion.log("OK", "EvaluateStreamChallenge", "dataset url: " + dsd.getUrl());
+		URL datasetUrl = connector.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName());
+		Conversion.log("OK", "EvaluateStreamChallenge", "dataset url: " + datasetUrl);
 		datasetLoader = new ArffLoader();
-		datasetLoader.setURL(dsd.getUrl().toString());
+		datasetLoader.setURL(datasetUrl.toString());
 		datasetStructure = new Instances(datasetLoader.getStructure());
 
 		predictionsLoader = new ArffLoader();
@@ -191,7 +193,7 @@ public class EvaluateStreamChallenge implements PredictionEvaluator {
 		ArrayList<EvaluationScore> evaluationMeasures = new ArrayList<EvaluationScore>();
 		for( String math_function : globalMeasures.keySet() ) {
 			MetricScore score = globalMeasures.get(math_function);
-			DecimalFormat dm = MathHelper.defaultDecimalFormat;
+			DecimalFormat dm = Constants.defaultDecimalFormat;
 			evaluationMeasures.add( 
 				new EvaluationScore( 
 					math_function, 

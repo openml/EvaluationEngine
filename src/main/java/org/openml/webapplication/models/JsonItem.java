@@ -19,7 +19,7 @@
  */
 package org.openml.webapplication.models;
 
-import org.openml.apiconnector.algorithms.MathHelper;
+import org.openml.apiconnector.settings.Constants;
 
 public class JsonItem {
 	private String key;
@@ -40,7 +40,7 @@ public class JsonItem {
 	
 	public JsonItem( String key, Double value ) {
 		this.key = key;
-		this.value = MathHelper.defaultDecimalFormat.format(value);
+		this.value = Constants.defaultDecimalFormat.format(value);
 		this.quotes = false;
 	}
 

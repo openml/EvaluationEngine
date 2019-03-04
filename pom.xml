@@ -23,9 +23,9 @@
       <name>Jan van Rijn</name>
       <email>j.n.van.rijn@liacs.leidenuniv.nl</email>
       <url>http://www.janvanrijn.eu</url>
-      <organization>Columbia University, USA</organization>
+      <organization>Leiden University</organization>
       <roles>
-        <role>Postdoctoral Reaseacher</role>
+        <role>Assistant Professor</role>
       </roles>
     </developer>
   </developers>
@@ -62,7 +62,6 @@
       <artifactId>weka-stable</artifactId>
       <version>3.8.2</version>
     </dependency>
-    
   
   </dependencies>
   

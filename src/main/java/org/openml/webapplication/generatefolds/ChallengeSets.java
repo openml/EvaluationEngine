@@ -16,6 +16,7 @@ import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
 import org.openml.apiconnector.xml.Task.Input.Stream_schedule;
 import org.openml.webapplication.io.Output;
+import org.openml.webapplication.settings.Settings;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -39,7 +40,7 @@ public class ChallengeSets {
 		Data_set ds = TaskInformation.getSourceData(current);
 		int dataset_id = ds.getData_set_id();
 		DataSetDescription dsd = apiconnector.dataGet(dataset_id);
-		Map<String, Double> dq = apiconnector.dataQualities(dsd.getId()).getQualitiesMap();
+		Map<String, Double> dq = apiconnector.dataQualities(dsd.getId(), Settings.EVALUATION_ENGINE_ID).getQualitiesMap();
 		Integer numInstances = dq.get("NumberOfInstances").intValue();
 		
 		Stream_schedule stream_schedule = TaskInformation.getStreamSchedule(current);

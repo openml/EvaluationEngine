@@ -12,6 +12,7 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Settings;
 import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.RunTrace;
+import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.EvaluateRun;
 
 
@@ -28,12 +29,13 @@ public class TestRunEvaluator {
 		Settings.CACHE_ALLOWED = false;
 		
 		File description = new File("data/test/run_1/description.xml");
+		Run run = (Run) XstreamXmlMapping.getInstance().fromXML(description);
 		File predictions = new File("data/test/run_1/predictions.arff");
 		File trace = new File("data/test/run_1/trace.arff");
 		Map<String, File> outputFiles = new TreeMap<>();
 		outputFiles.put("predictions", predictions);
 		outputFiles.put("trace", trace);
-		int rid = clientWrite.runUpload(description, outputFiles).getRun_id();
+		int rid = clientWrite.runUpload(run, outputFiles);
 		
 		try {
 			new EvaluateRun(clientAdmin, rid, null, null, null, null, null);
@@ -42,8 +44,8 @@ public class TestRunEvaluator {
 			// sometimes OpenML already processed the run ... 
 		}
 		
-		Run run = clientWrite.runGet(rid);
-		assertTrue(run.getOutputEvaluation().length > 5);
+		Run runDownloaded = clientWrite.runGet(rid);
+		assertTrue(runDownloaded.getOutputEvaluation().length > 5);
 		RunTrace runTrace = clientWrite.runTrace(rid);
 		assertTrue(runTrace.getTrace_iterations().length > 10);
 	}
