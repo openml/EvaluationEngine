@@ -28,7 +28,7 @@
         <role>Assistant Professor</role>
       </roles>
     </developer>
-  </developers>
+    </developers>
   
   
   <dependencies>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.21-SNAPSHOT</version>
+      <version>1.0.21</version>
     </dependency>
     
     <dependency> <!-- TODO JvR: remove/replace this one!-->
