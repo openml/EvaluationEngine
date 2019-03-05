@@ -137,7 +137,7 @@ public class EvaluateRun {
 				trace = traceToXML(runFiles.get("trace").getFileId(), task_id, runId);
 			}
 			String description_url = apiconnector.getOpenmlFileUrl(runFiles.get("description").getFileId(), "Run_" + runId + "_description.xml").toString();
-			File runDescriptionFile = HttpConnector.getTempFileFromUrl(new URL(description_url), "xml", false);
+			File runDescriptionFile = HttpConnector.getTempFileFromUrl(new URL(description_url), "xml");
 			String description = Conversion.fileToString(runDescriptionFile);
 			
 			Run run_description = (Run) xstream.fromXML(description);
