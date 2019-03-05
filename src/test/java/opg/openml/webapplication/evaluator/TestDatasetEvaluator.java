@@ -14,7 +14,7 @@ import org.openml.webapplication.ProcessDataset;
 import org.openml.webapplication.settings.Settings;
 import org.openml.webapplication.testutils.DatasetFactory;
 
-import testbase.BaseTestFramework;
+import org.openml.webapplication.testutils.BaseTestFramework;
 import weka.core.Instances;
 
 public class TestDatasetEvaluator extends BaseTestFramework {

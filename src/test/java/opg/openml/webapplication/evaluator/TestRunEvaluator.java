@@ -12,7 +12,7 @@ import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.EvaluateRun;
 
-import testbase.BaseTestFramework;
+import org.openml.webapplication.testutils.BaseTestFramework;
 
 public class TestRunEvaluator extends BaseTestFramework {
 	

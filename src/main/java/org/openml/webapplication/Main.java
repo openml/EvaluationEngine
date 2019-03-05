@@ -46,8 +46,6 @@ public class Main {
 	
 	public static final int FOLD_GENERATION_SEED = 0;
 	
-	public static final int[] TASK_TYPE_IDS = {1, 2, 3, 4, 5, 6, 7};
-	
 	public static void main( String[] args ) {
 		OpenmlConnector apiconnector;
 		CommandLineParser parser = new GnuParser();
@@ -99,7 +97,7 @@ public class Main {
 				
 				String function = cli.getOptionValue("f");
 				if( function.equals("evaluate_run") ) {
-					int[] ttids = TASK_TYPE_IDS;
+					int[] ttids = org.openml.webapplication.settings.Settings.SUPPORTED_TASK_TYPES_EVALUATION;
 					if (cli.hasOption("mode")) {
 						ttids = new int[1];
 						ttids[0] = Integer.parseInt(cli.getOptionValue("mode"));

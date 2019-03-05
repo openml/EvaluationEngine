@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
@@ -101,6 +102,10 @@ public class EvaluateRun {
 		final DataSetDescription dataset;
 		final Run runServer = apiconnector.runGet(runId);
 		final Task task = apiconnector.taskGet(runServer.getTask_id());
+		if (!ArrayUtils.contains(Settings.SUPPORTED_TASK_TYPES_EVALUATION, task.getTask_type_id())) {
+			throw new Exception("Task type not supported: " + task.getTask_type());
+		}
+		
 		final Map<String, Run.Data.File> runFiles = runServer.getOutputFileAsMap();
 		final Data_set source_data = TaskInformation.getSourceData(task);
 		final Integer dataset_id = source_data.getLabeled_data_set_id() != null ? source_data.getLabeled_data_set_id() : source_data.getData_set_id();
