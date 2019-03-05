@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Test;
+import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Settings;
 import org.openml.apiconnector.xml.Run;
