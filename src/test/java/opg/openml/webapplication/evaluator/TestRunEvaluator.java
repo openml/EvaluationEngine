@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Test;
-import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Settings;
 import org.openml.apiconnector.xml.Run;
-import org.openml.apiconnector.xml.RunTrace;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.EvaluateRun;
 
@@ -26,15 +24,14 @@ public class TestRunEvaluator {
 	
 	@Test
 	public final void testEvaluateRun() throws Exception {
+		// TODO: add test trace function
 		Settings.CACHE_ALLOWED = false;
 		
 		File description = new File("data/test/run_1/description.xml");
 		Run run = (Run) XstreamXmlMapping.getInstance().fromXML(description);
 		File predictions = new File("data/test/run_1/predictions.arff");
-		File trace = new File("data/test/run_1/trace.arff");
 		Map<String, File> outputFiles = new TreeMap<>();
 		outputFiles.put("predictions", predictions);
-		outputFiles.put("trace", trace);
 		int rid = clientWrite.runUpload(run, outputFiles);
 		
 		try {
@@ -46,7 +43,5 @@ public class TestRunEvaluator {
 		
 		Run runDownloaded = clientWrite.runGet(rid);
 		assertTrue(runDownloaded.getOutputEvaluation().length > 5);
-		RunTrace runTrace = clientWrite.runTrace(rid);
-		assertTrue(runTrace.getTrace_iterations().length > 10);
 	}
 }
