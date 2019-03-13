@@ -39,11 +39,20 @@
       <scope>test</scope>
     </dependency>
     
+    <dependency> <!-- for running tests on tasks -->
+      <groupId>org.openml</groupId>
+      <artifactId>openmlweka</artifactId>
+      <version>0.9.7-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
       <version>1.0.23-SNAPSHOT</version>
     </dependency>
+    
+    
     
     <dependency> <!-- TODO JvR: remove/replace this one!-->
       <groupId>org.mod4j.org.apache.commons</groupId>

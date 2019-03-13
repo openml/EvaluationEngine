@@ -24,7 +24,7 @@ public class GenerateTaskSplitsMd5Mapping extends BaseTestFramework {
 	
 	public static void main(String[] args) throws Exception {
 		// TODO: ensure that <userhome>/.openml/openml.conf has same settings as client_read_live
-		int startIdx = 132;
+		int startIdx = 1;
 		int endIdx = 1000;
 		for (int i = startIdx; i <= endIdx; ++i) {
 			Task t;
