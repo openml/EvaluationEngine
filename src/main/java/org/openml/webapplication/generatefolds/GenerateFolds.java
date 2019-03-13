@@ -245,7 +245,7 @@ public class GenerateFolds {
 			case CROSSVALIDATION:
 				return ep.getRepeats() * ep.getFolds() * numInstances; // repeats * folds * data set size
 			default:
-				throw new RuntimeException("Illigal evaluationMethod: " + ep.getType());
+				throw new RuntimeException("Unsupported evaluationMethod: " + ep.getType());
 		}
 	}
 
@@ -259,7 +259,7 @@ public class GenerateFolds {
 				}
 				return ep.getRepeats() * ep.getFolds() * splitRecordsPerFold; // repeats * folds * perfold
 			default:
-				throw new RuntimeException("Illigal evaluationMethod for learning curves: " + ep.getType());
+				throw new RuntimeException("Unsupported evaluationMethod for learning curves: " + ep.getType());
 		}
 	}
 
