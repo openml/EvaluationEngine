@@ -75,7 +75,7 @@ public class ChallengeSets {
 		for (int i = offset; i < Math.min(offset + numInstances, trainAvailable); ++i) {
 			trainingSet.add((Instance) dataset.get(i).copy());
 		}
-		Output.instanes2file(trainingSet, new OutputStreamWriter(System.out), null);
+		Output.instances2file(trainingSet, new OutputStreamWriter(System.out), null);
 	}
 	
 	public void test(Integer offset, Integer numInstances) throws IOException {
@@ -99,6 +99,6 @@ public class ChallengeSets {
 			current.setValue(targetAttribute, Double.NaN);
 			testSet.add(current);
 		}
-		Output.instanes2file(testSet, new OutputStreamWriter(System.out), null);
+		Output.instances2file(testSet, new OutputStreamWriter(System.out), null);
 	}
 }

@@ -229,7 +229,7 @@ public class InstanceBased {
 	}
 	
 	public void toStdout(String[] leadingComments) throws IOException {
-		Output.instanes2file(resultSet, new OutputStreamWriter(System.out), leadingComments);
+		Output.instances2file(resultSet, new OutputStreamWriter(System.out), leadingComments);
 	}
 	
 	private static Map<Integer,Map<Integer,Map<Integer,Map<Integer,String>>>> predictionsToHashMap(Instances predictions) {

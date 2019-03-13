@@ -131,9 +131,9 @@ public class Main {
 					Instances splits = gf.getSplits();
 					if(cli.hasOption("o") == true) {
 						FileWriter f = new FileWriter(cli.getOptionValue("o"));
-						Output.instanes2file(splits, f, null);
+						Output.instances2file(splits, f, null);
 					} else {
-						Output.instanes2file(splits, new OutputStreamWriter(System.out), null);
+						Output.instances2file(splits, new OutputStreamWriter(System.out), null);
 					}
 					
 				} else if(function.equals("all_wrong")) {
