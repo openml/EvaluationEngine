@@ -15,17 +15,11 @@ import org.openml.weka.experiment.RunOpenmlJob;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.MultiSearch;
 import weka.classifiers.meta.multisearch.RandomSearch;
 import weka.classifiers.trees.J48;
 import weka.core.setupgenerator.AbstractParameter;
 import weka.core.setupgenerator.MathParameter;
-import weka.filters.Filter;
-import weka.filters.MultiFilter;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.RemoveUseless;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 public class TestRunEvaluator extends BaseTestFramework {
 	
@@ -51,6 +45,13 @@ public class TestRunEvaluator extends BaseTestFramework {
 	@Test
 	public final void testEvaluateClassificationRun() throws Exception {
 		int taskId = 115;
+		Classifier classifier = new NaiveBayes();
+		testEvaluateRun(taskId, classifier);
+	}
+	
+	@Test
+	public final void testEvaluateLeaveOneOutClassification() throws Exception {
+		int taskId = 238;
 		Classifier classifier = new NaiveBayes();
 		testEvaluateRun(taskId, classifier);
 	}
