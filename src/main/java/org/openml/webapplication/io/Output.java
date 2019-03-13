@@ -117,20 +117,8 @@ public class Output {
 		if( bootstrap == false ) {
 			return evaluatorToMap(evaluator[0], classes, task);
 		} else {
-			Map<String, MetricScore> e0 = evaluatorToMap(evaluator[0], classes, task); // pessimistic test score
-			Map<String, MetricScore> el = evaluatorToMap(evaluator[0], classes, task); // training score
-			
-			Map<String, MetricScore> total = new HashMap<String, MetricScore>();
-
-			// TODO: define the multiply and sum operator for MetricScore
-			/*for( Metric m : e0.keySet() ) {
-				MetricScore s_total = new MetricSce0.get( m ) + el.get( m );
-				total.put(m, value);
-			}*/
-			
-			return total;
+			throw new Exception("bootstrap not supported yet");
 		}
-		
 	}
 	
 	

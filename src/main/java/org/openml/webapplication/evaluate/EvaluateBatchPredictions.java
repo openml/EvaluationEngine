@@ -37,11 +37,11 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.models.MetricScore;
 import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.EstimationProcedureType;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.webapplication.algorithm.InstancesHelper;
-import org.openml.webapplication.generatefolds.EstimationProcedure;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
@@ -94,7 +94,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsPath);
 		
 		Estimation_procedure estimationprocedure = TaskInformation.getEstimationProcedure(task);
-		this.bootstrap = estimationprocedure.getType().equals(EstimationProcedure.estimationProceduresTxt[6] );
+		this.bootstrap = estimationprocedure.getType() == EstimationProcedureType.BOOTSTRAPPING;
 		String classAttribute = TaskInformation.getSourceData(task).getTarget_feature();
 		cost_matrix = TaskInformation.getCostMatrix(task);
 

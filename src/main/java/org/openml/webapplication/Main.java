@@ -19,28 +19,27 @@
  */
 package org.openml.webapplication;
 
-import java.net.URL;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.json.JSONArray;
-import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Config;
 import org.openml.apiconnector.settings.Settings;
-import org.openml.apiconnector.xml.DataSetDescription;
-import org.openml.apiconnector.xml.Task;
-import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.webapplication.features.CharacterizerFactory;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.generatefolds.ChallengeSets;
 import org.openml.webapplication.generatefolds.GenerateFolds;
 import org.openml.webapplication.io.Output;
+
+import weka.core.Instances;
 
 public class Main {
 	
@@ -128,85 +127,13 @@ public class Main {
 					fc.start(id, mode, cli.getOptionValue("tag"), null);
 					fc.toString();
 				} else if( function.equals("generate_folds") ) {
-					URL datasetUrl;
-					String target_feature;
-					String estimation_procedure;
-					String custum_testset = null; 
-					String datasetName;
-					
-					if(cli.hasOption("id")) {
-						id = Integer.parseInt(cli.getOptionValue("id"));
-						Task current = apiconnector.taskGet(id);
-						Map<String, String> inputs = apiconnector.taskInputs(id).getInputsAsMap();
-						int dataset_id = TaskInformation.getSourceData(current).getData_set_id();
-						DataSetDescription dsd = apiconnector.dataGet(dataset_id);
-						Estimation_procedure ep = TaskInformation.getEstimationProcedure(current);
-						Integer numberOfRepeats = null;
-						Integer numberOfFolds = null;
-						Integer percentage = null;
-						try {numberOfRepeats = TaskInformation.getNumberOfRepeats(current);} catch(Exception e) {}
-						try {numberOfFolds = TaskInformation.getNumberOfFolds(current);} catch(Exception e) {}
-						try {percentage = TaskInformation.getPercentage(current);} catch(Exception e) {}
-						datasetName = dsd.getName();
-						datasetUrl = apiconnector.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName());
-						target_feature = TaskInformation.getSourceData(current).getTarget_feature();
-						estimation_procedure = ep.getType();
-						if (numberOfRepeats != null) {estimation_procedure += "_" + numberOfRepeats;}
-						if (numberOfFolds != null) {estimation_procedure += "_" + numberOfFolds;}
-						if (percentage != null) {estimation_procedure += "_" + percentage;}
-						
-						if (inputs.containsKey("custom_testset")) {
-							custum_testset = inputs.get("custom_testset");
-						}
-					} else {
-						System.out.println(Output.styleToJsonError("Missing arguments for function 'generate_folds'. Need id (task_id). "));
-						return;
-					}
-					
-
-					List<List<List<Integer>>> testset = new ArrayList<List<List<Integer>>>();
-					if(custum_testset != null && custum_testset.length() > 0) {
-						JSONArray rowidsJson;
-						try {
-							rowidsJson = new JSONArray(custum_testset);
-						} catch(Exception e) {
-							System.out.println(Output.styleToJsonError("Problem parsing custom splits.  "));
-							return;
-						}
-						
-						for(int i = 0; i < rowidsJson.length(); ++i) {
-							while (testset.size() <= i) {
-								testset.add(new ArrayList<List<Integer>>());
-							}
-							
-							for( int j = 0; j < rowidsJson.getJSONArray(i).length(); ++j ) {
-								while (testset.get(i).size() <= j) {
-									testset.get(i).add(new ArrayList<Integer>());
-								}
-								
-								for( int k = 0; k < rowidsJson.getJSONArray(i).getJSONArray(j).length(); ++k ) {
-									
-									testset.get(i).get(j).add(rowidsJson.getJSONArray(i).getJSONArray(j).getInt(k));
-								}
-								
-							}
-						}
-					}
-					
-					GenerateFolds gf = new GenerateFolds(
-							apiconnector, 
-							datasetName,
-							datasetUrl, 
-							estimation_procedure, 
-							target_feature, 
-							testset, 
-							FOLD_GENERATION_SEED );
+					GenerateFolds gf = new GenerateFolds(apiconnector, Integer.parseInt(cli.getOptionValue("id")), FOLD_GENERATION_SEED);
+					Instances splits = gf.getSplits();
 					if(cli.hasOption("o") == true) {
-						gf.toFile(cli.getOptionValue("o"));
-					} else if(cli.hasOption("m") == true) {
-						gf.toStdOutMd5();
-					}else {
-						gf.toStdout();
+						FileWriter f = new FileWriter(cli.getOptionValue("o"));
+						Output.instanes2file(splits, f, null);
+					} else {
+						Output.instanes2file(splits, new OutputStreamWriter(System.out), null);
 					}
 					
 				} else if(function.equals("all_wrong")) {

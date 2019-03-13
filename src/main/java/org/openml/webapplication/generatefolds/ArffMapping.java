@@ -30,7 +30,7 @@ public class ArffMapping {
 	ArrayList<Attribute> attributes;
 	
 	
-	public ArffMapping( boolean use_samples ) {
+	public ArffMapping(boolean use_samples) {
 		attributes = new ArrayList<Attribute>();
 		
 		ArrayList<String> att_type_values = new ArrayList<String>();
@@ -47,7 +47,7 @@ public class ArffMapping {
 		attributes.add(repeat);
 		attributes.add(fold);
 		
-		if(use_samples){
+		if(use_samples) {
 			Attribute sample = new Attribute("sample");
 			attributes.add(sample);
 		}
