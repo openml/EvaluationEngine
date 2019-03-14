@@ -94,9 +94,23 @@ public class GenerateFolds {
 			return sample_splits_crossvalidation(name);
 		case LEAVEONEOUT:
 			return sample_splits_leaveoneout(name);
+		case TESTONTRAININGDATA:
+			return sample_splits_train_on_test(name);
 		default:
 			throw new RuntimeException("Illigal evaluationMethod (GenerateFolds::generateInstances)");
 		}
+	}
+
+	private Instances sample_splits_train_on_test(String name) {
+		Instances splits = new Instances(name, am.getArffHeader(), splits_size);
+		
+		for (int i = 0; i < dataset.numInstances(); ++i) {
+			int rowid = (int) dataset.instance(i).value(0);
+			splits.add(am.createInstance(false, rowid, 0, 0));
+			splits.add(am.createInstance(true, rowid, 0, 0));
+		}
+		
+		return splits;
 	}
 
 	private Instances sample_splits_holdout(String name) {
@@ -236,7 +250,7 @@ public class GenerateFolds {
 		return splits;
 	}*/
 
-	private static int getSplitsSizeVanilla(EstimationProcedure ep, int numInstances) {
+	private static int getSplitsSizeVanilla(EstimationProcedure ep, int numInstances) throws Exception {
 		switch (ep.getType()) {
 			case LEAVEONEOUT:
 				return numInstances * numInstances; // repeats (== data set size) * data set size
@@ -244,8 +258,13 @@ public class GenerateFolds {
 				return ep.getRepeats() * numInstances; // repeats * data set size (each instance is used once)
 			case CROSSVALIDATION:
 				return ep.getRepeats() * ep.getFolds() * numInstances; // repeats * folds * data set size
+			case TESTONTRAININGDATA:
+				if (ep.getRepeats() != null || ep.getFolds() != null) {
+					throw new Exception("Weird fold/repeat combination for type: " + ep.getType());
+				}
+				return numInstances * 2;
 			default:
-				throw new RuntimeException("Unsupported evaluationMethod: " + ep.getType());
+				throw new Exception("Unsupported evaluationMethod: " + ep.getType());
 		}
 	}
 
