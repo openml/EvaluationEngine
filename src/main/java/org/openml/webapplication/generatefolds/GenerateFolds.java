@@ -97,7 +97,7 @@ public class GenerateFolds {
 		case TESTONTRAININGDATA:
 			return sample_splits_train_on_test(name);
 		default:
-			throw new RuntimeException("Illigal evaluationMethod (GenerateFolds::generateInstances)");
+			throw new RuntimeException("Illegal evaluationMethod (GenerateFolds::generateInstances)");
 		}
 	}
 
