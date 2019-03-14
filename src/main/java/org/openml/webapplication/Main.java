@@ -19,9 +19,7 @@
  */
 package org.openml.webapplication;
 
-import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
