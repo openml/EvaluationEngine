@@ -254,7 +254,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 									score.getArrayAsString(dm), i, j);
 							}
 							// do not add individual scores for LOO
-							if (estimationProcedure.getType() != EstimationProcedureType.LEAVEONEOUT) {
+							if (estimationProcedure.getType() != EstimationProcedureType.LEAVEONEOUT && estimationProcedure.getType() != EstimationProcedureType.TESTONTRAININGDATA) {
 								evaluationMeasuresList.add(currentMeasure);
 							}
 							if (currentScore != null && k == sampleEvaluation[i][j].length - 1) {
