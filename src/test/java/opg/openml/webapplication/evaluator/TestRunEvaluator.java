@@ -2,49 +2,103 @@ package opg.openml.webapplication.evaluator;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.util.Map;
-import java.util.TreeMap;
-
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.openml.apiconnector.io.ApiException;
-import org.openml.apiconnector.io.OpenmlConnector;
-import org.openml.apiconnector.settings.Settings;
 import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.RunTrace;
 import org.openml.webapplication.EvaluateRun;
 
+import org.openml.webapplication.testutils.BaseTestFramework;
+import org.openml.weka.algorithm.WekaConfig;
+import org.openml.weka.experiment.RunOpenmlJob;
 
-public class TestRunEvaluator {
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.meta.MultiSearch;
+import weka.classifiers.meta.multisearch.RandomSearch;
+import weka.classifiers.trees.J48;
+import weka.core.setupgenerator.AbstractParameter;
+import weka.core.setupgenerator.MathParameter;
+
+public class TestRunEvaluator extends BaseTestFramework {
 	
-	private static final String testUrl = "https://test.openml.org/";
-	private static final String testKeyWrite = "8baa83ecddfe44b561fd3d92442e3319"; // write key
-	private static final String testKeyAdmin = "d488d8afd93b32331cf6ea9d7003d4c3"; // admin key
-	private static final OpenmlConnector clientAdmin = new OpenmlConnector(testUrl, testKeyAdmin);
-	private static final OpenmlConnector clientWrite = new OpenmlConnector(testUrl, testKeyWrite);
-	
-	@Test
-	public final void testEvaluateRun() throws Exception {
-		Settings.CACHE_ALLOWED = false;
-		
-		File description = new File("data/test/run_1/description.xml");
-		File predictions = new File("data/test/run_1/predictions.arff");
-		File trace = new File("data/test/run_1/trace.arff");
-		Map<String, File> outputFiles = new TreeMap<>();
-		outputFiles.put("predictions", predictions);
-		outputFiles.put("trace", trace);
-		int rid = clientWrite.runUpload(description, outputFiles).getRun_id();
+	private final static int testEvaluateRun(int taskId, Classifier classifier) throws Exception {
+		final String configString = "avoid_duplicate_runs=false; skip_jvm_benchmark=true;";
+		final WekaConfig config = new WekaConfig(configString);
+		final Pair<Integer, Run> result = RunOpenmlJob.executeTask(client_write_test, config, taskId, classifier);
 		
 		try {
-			new EvaluateRun(clientAdmin, rid, null, null, null, null, null);
+			// note that changing the evaluation engine id does not help us with
+			// adding duplicate records
+			new EvaluateRun(client_admin_test, result.getLeft(), null, null, null, null, null);
 			// automatically processes run
 		} catch (ApiException e) {
 			// sometimes OpenML already processed the run ... 
 		}
 		
-		Run run = clientWrite.runGet(rid);
-		assertTrue(run.getOutputEvaluation().length > 5);
-		RunTrace runTrace = clientWrite.runTrace(rid);
-		assertTrue(runTrace.getTrace_iterations().length > 10);
+		Run runDownloaded = client_write_test.runGet(result.getLeft());
+		assertTrue(runDownloaded.getOutputEvaluation().length > 5);
+		return result.getLeft();
+	}
+	
+	@Test
+	public final void testEvaluateClassificationRun() throws Exception {
+		int taskId = 115;
+		Classifier classifier = new NaiveBayes();
+		testEvaluateRun(taskId, classifier);
+	}
+	
+	@Test
+	public final void testEvaluateLeaveOneOutClassification() throws Exception {
+		int taskId = 238;
+		Classifier classifier = new NaiveBayes();
+		testEvaluateRun(taskId, classifier);
+	}
+	
+	@Test
+	public final void testEvaluateClassificationRunWithTrace() throws Exception {
+		int taskId = 115;
+		int numFolds = 10;
+		int numRepeats = 1;
+		int numIterations = 10;
+		int runId = testEvaluateRun(taskId, getRandomSearchClassifier(numIterations));
+		RunTrace trace = client_read_test.runTrace(runId);
+		int expectedResults = numFolds * numRepeats * numIterations;
+		assertTrue(trace.getTrace_iterations().length == expectedResults);
+	}
+	
+	private Classifier getRandomSearchClassifier(int numIterations) throws Exception {
+		RandomSearch randomSearchAlgorithm = new RandomSearch();
+		randomSearchAlgorithm.setNumIterations(numIterations);
+		randomSearchAlgorithm.setSearchSpaceNumFolds(2);
+		
+		J48 baseclassifier = new J48();
+		
+		MathParameter numFeatures = new MathParameter();
+		numFeatures.setProperty("classifier.minNumObj");
+		numFeatures.setBase(1);
+		numFeatures.setExpression("I");
+		numFeatures.setMin(1);
+		numFeatures.setMax(20);
+		numFeatures.setStep(1);
+
+		MathParameter maxDepth = new MathParameter();
+		maxDepth.setProperty("classifier.confidenceFactor");
+		maxDepth.setBase(10);
+		maxDepth.setExpression("pow(BASE,I)");
+		maxDepth.setMin(-4);
+		maxDepth.setMax(-1);
+		maxDepth.setStep(1);
+		
+		AbstractParameter[] searchParameters = {numFeatures, maxDepth};
+		
+		MultiSearch search = new MultiSearch();
+		String[] evaluation = {"-E", "ACC"};
+		search.setOptions(evaluation);
+		search.setClassifier(baseclassifier);
+		search.setAlgorithm(randomSearchAlgorithm);
+		search.setSearchParameters(searchParameters);
+		return search;
 	}
 }

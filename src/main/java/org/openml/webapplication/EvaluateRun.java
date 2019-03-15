@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
@@ -21,9 +22,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EvaluationRequest;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Run;
-import org.openml.apiconnector.xml.RunEvaluate;
 import org.openml.apiconnector.xml.RunEvaluation;
-import org.openml.apiconnector.xml.RunList;
 import org.openml.apiconnector.xml.RunTrace;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
@@ -82,7 +81,7 @@ public class EvaluateRun {
 					Conversion.log("INFO", "Evaluate Run", "Obtained " + er.getRuns().length + " unevaluated runs");
 					
 					// this loops over the unevaluated runs that we obtained with the evaluation request.
-					for (RunList.Run r : er.getRuns()) {
+					for (Run r : er.getRuns()) {
 						run_id = r.getRun_id();
 						Conversion.log("INFO", "Evaluate Run", "Downloading run " + run_id);
 						evaluate(run_id);
@@ -103,6 +102,10 @@ public class EvaluateRun {
 		final DataSetDescription dataset;
 		final Run runServer = apiconnector.runGet(runId);
 		final Task task = apiconnector.taskGet(runServer.getTask_id());
+		if (!ArrayUtils.contains(Settings.SUPPORTED_TASK_TYPES_EVALUATION, task.getTask_type_id())) {
+			throw new Exception("Task type not supported: " + task.getTask_type());
+		}
+		
 		final Map<String, Run.Data.File> runFiles = runServer.getOutputFileAsMap();
 		final Data_set source_data = TaskInformation.getSourceData(task);
 		final Integer dataset_id = source_data.getLabeled_data_set_id() != null ? source_data.getLabeled_data_set_id() : source_data.getData_set_id();
@@ -121,19 +124,17 @@ public class EvaluateRun {
 			
 			if(runFiles.get("description") == null) {
 				runevaluation.setError("Run description file not present. ", MAX_LENGTH_WARNING);
-				File evaluationFile = Conversion.stringToTempFile(xstream.toXML(runevaluation), "run_" + runId + "evaluations", "xml");
 				
-				RunEvaluate re = apiconnector.runEvaluate(evaluationFile);
-				Conversion.log("Error", "Process Run", "Run processed, but with error: " + re.getRun_id());
+				int receivedId = apiconnector.runEvaluate(runevaluation);
+				Conversion.log("Error", "Process Run", "Run processed, but with error: " + receivedId);
 				return;
 			}
 			
 			if(runFiles.get("predictions") == null && runFiles.get("subgroups") == null && runFiles.get("predictions_0") == null) { // TODO: this is currently true, but later on we might have tasks that do not require evaluations!
 				runevaluation.setError("Required output files not present (e.g., arff predictions). ", MAX_LENGTH_WARNING);
-				File evaluationFile = Conversion.stringToTempFile(xstream.toXML(runevaluation), "run_" + runId + "evaluations", "xml");
 				
-				RunEvaluate re = apiconnector.runEvaluate(evaluationFile);
-				Conversion.log("Error", "Process Run", "Run processed, but with error: " + re.getRun_id());
+				int receivedId = apiconnector.runEvaluate(runevaluation);
+				Conversion.log("Error", "Process Run", "Run processed, but with error: " + receivedId);
 				return;
 			}
 			
@@ -141,7 +142,7 @@ public class EvaluateRun {
 				trace = traceToXML(runFiles.get("trace").getFileId(), task_id, runId);
 			}
 			String description_url = apiconnector.getOpenmlFileUrl(runFiles.get("description").getFileId(), "Run_" + runId + "_description.xml").toString();
-			File runDescriptionFile = HttpConnector.getFileFromUrl(new URL(description_url), false, "xml");
+			File runDescriptionFile = HttpConnector.getTempFileFromUrl(new URL(description_url), "xml");
 			String description = Conversion.fileToString(runDescriptionFile);
 			
 			Run run_description = (Run) xstream.fromXML(description);
@@ -231,28 +232,18 @@ public class EvaluateRun {
 		
 		Conversion.log("OK", "Process Run", "Start uploading results ... ");
 		try {
-			String runEvaluation = xstream.toXML(runevaluation);
-			// System.out.println(runEvaluation);
-			File evaluationFile = Conversion.stringToTempFile(runEvaluation, "run_" + runId + "evaluations", "xml");
-			// apiconnector.setVerboseLevel(1);
-			RunEvaluate re = apiconnector.runEvaluate(evaluationFile);
+			int receivedId = apiconnector.runEvaluate(runevaluation);
 
 			if (trace != null) {
-				String runTrace = xstream.toXML(trace);
-				// System.out.println(runTrace);
-				File traceFile = Conversion.stringToTempFile(runTrace, "run_" + runId + "trace", "xml");
-
-				apiconnector.runTraceUpload(traceFile);
+				apiconnector.runTraceUpload(trace);
 			}
 
-			Conversion.log("OK", "Process Run", "Run processed: " + re.getRun_id());
+			Conversion.log("OK", "Process Run", "Run processed: " + receivedId);
 		} catch (ApiException e) {
 			Conversion.log("ERROR", "Process Run", "An error occured during API call: " + e.getMessage());
 			RunEvaluation errorEvaluation = new RunEvaluation(runId, Settings.EVALUATION_ENGINE_ID);
 			errorEvaluation.setError(e.getMessage(), MAX_LENGTH_WARNING);
-			File errorEvaluationFile = Conversion.stringToTempFile(xstream.toXML(errorEvaluation), "run_" + runId + "evaluations", "xml");
-			// apiconnector.setVerboseLevel(1);
-			apiconnector.runEvaluate(errorEvaluationFile);
+			apiconnector.runEvaluate(errorEvaluation);
 			Conversion.log("ERROR", "Process Run", "Processed run with error message. ");
 		} catch (Exception e) {
 			Conversion.log("ERROR", "Process Run", "An error occured during API call: " + e.getMessage());

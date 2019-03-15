@@ -16,6 +16,7 @@ import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
 import org.openml.apiconnector.xml.Task.Input.Stream_schedule;
 import org.openml.webapplication.io.Output;
+import org.openml.webapplication.settings.Settings;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -39,7 +40,7 @@ public class ChallengeSets {
 		Data_set ds = TaskInformation.getSourceData(current);
 		int dataset_id = ds.getData_set_id();
 		DataSetDescription dsd = apiconnector.dataGet(dataset_id);
-		Map<String, Double> dq = apiconnector.dataQualities(dsd.getId()).getQualitiesMap();
+		Map<String, Double> dq = apiconnector.dataQualities(dsd.getId(), Settings.EVALUATION_ENGINE_ID).getQualitiesMap();
 		Integer numInstances = dq.get("NumberOfInstances").intValue();
 		
 		Stream_schedule stream_schedule = TaskInformation.getStreamSchedule(current);
@@ -74,7 +75,7 @@ public class ChallengeSets {
 		for (int i = offset; i < Math.min(offset + numInstances, trainAvailable); ++i) {
 			trainingSet.add((Instance) dataset.get(i).copy());
 		}
-		Output.instanes2file(trainingSet, new OutputStreamWriter(System.out), null);
+		Output.instances2file(trainingSet, new OutputStreamWriter(System.out), null);
 	}
 	
 	public void test(Integer offset, Integer numInstances) throws IOException {
@@ -98,6 +99,6 @@ public class ChallengeSets {
 			current.setValue(targetAttribute, Double.NaN);
 			testSet.add(current);
 		}
-		Output.instanes2file(testSet, new OutputStreamWriter(System.out), null);
+		Output.instances2file(testSet, new OutputStreamWriter(System.out), null);
 	}
 }

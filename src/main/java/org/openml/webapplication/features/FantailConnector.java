@@ -19,7 +19,6 @@
  */
 package org.openml.webapplication.features;
 
-import com.thoughtworks.xstream.XStream;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -28,10 +27,8 @@ import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataQuality;
 import org.openml.apiconnector.xml.DataQuality.Quality;
-import org.openml.apiconnector.xml.DataQualityUpload;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.DataUnprocessed;
-import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.fantail.dc.Characterizer;
 import org.openml.webapplication.settings.Settings;
 
@@ -50,7 +47,6 @@ import java.util.TreeSet;
 
 public class FantailConnector {
 	private final Integer window_size = null; // TODO: make it work again
-	private static final XStream xstream = XstreamXmlMapping.getInstance();
 	private OpenmlConnector apiconnector;
 	private final List<Characterizer> CHARACTERIZERS;
 
@@ -93,7 +89,7 @@ public class FantailConnector {
 		Instances dataset = new Instances(new FileReader(apiconnector.datasetGet(dsd)));
 		List<String> qualitiesAvailable = new ArrayList<String>();
 		try {
-			qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId).getQualityNames());
+			qualitiesAvailable = Arrays.asList(apiconnector.dataQualities(datasetId, Settings.EVALUATION_ENGINE_ID).getQualityNames());
 		} catch(ApiException ae) {
 			if (ae.getCode() != 362) {
 				throw ae;
@@ -107,9 +103,8 @@ public class FantailConnector {
 		Conversion.log("OK", "Extract Features", "Done generating features, start wrapping up");
 		if (qualities.size() > 0) {
 			DataQuality dq = new DataQuality(datasetId, Settings.EVALUATION_ENGINE_ID, qualities.toArray(new Quality[qualities.size()]));
-			String strQualities = xstream.toXML(dq);
-			DataQualityUpload dqu = apiconnector.dataQualitiesUpload(Conversion.stringToTempFile(strQualities, "qualities_did_" + datasetId, "xml"));
-			Conversion.log("OK", "Extract Features", "DONE: " + dqu.getDid());
+			int uploadedId = apiconnector.dataQualitiesUpload(dq);
+			Conversion.log("OK", "Extract Features", "DONE: " + uploadedId);
 		} else {
 			Conversion.log("OK", "Extract Features", "DONE: Nothing to upload");
 		}

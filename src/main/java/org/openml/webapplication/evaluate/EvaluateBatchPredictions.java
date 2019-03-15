@@ -32,16 +32,17 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.json.JSONArray;
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.Input;
-import org.openml.apiconnector.algorithms.MathHelper;
 import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.models.MetricScore;
+import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.EstimationProcedure;
+import org.openml.apiconnector.xml.EstimationProcedureType;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.webapplication.algorithm.InstancesHelper;
-import org.openml.webapplication.generatefolds.EstimationProcedure;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
@@ -67,6 +68,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private final PredictionCounter predictionCounter;
 	private final String[] classes;
+	private final EstimationProcedure estimationProcedure;
 	private final TaskType taskType;
 	private final JSONArray cost_matrix;
 	private final Evaluation[][][][] sampleEvaluation;
@@ -76,6 +78,8 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	public EvaluateBatchPredictions(OpenmlConnector openml, Task task, TaskType taskType, URL predictionsPath) throws Exception {
 		final int datasetId = TaskInformation.getSourceData(task).getData_set_id();
+		int epId = TaskInformation.getEstimationProcedure(task).getId();
+		estimationProcedure = openml.estimationProcedureGet(epId);
 		DataSetDescription dsd = openml.dataGet(datasetId);
 		this.taskType = taskType;
 		
@@ -94,7 +98,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsPath);
 		
 		Estimation_procedure estimationprocedure = TaskInformation.getEstimationProcedure(task);
-		this.bootstrap = estimationprocedure.getType().equals(EstimationProcedure.estimationProceduresTxt[6] );
+		this.bootstrap = estimationprocedure.getType() == EstimationProcedureType.BOOTSTRAPPING;
 		String classAttribute = TaskInformation.getSourceData(task).getTarget_feature();
 		cost_matrix = TaskInformation.getCostMatrix(task);
 
@@ -221,7 +225,10 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 			throw new RuntimeException("Prediction count does not match: " + predictionCounter.getErrorMessage());
 		}
 		
+		// evaluationMeasuresList is an array that holds all evaluations that will be attached to a run
 		List<EvaluationScore> evaluationMeasuresList = new ArrayList<EvaluationScore>();
+		// tmpFoldEvaluations contains all results obtained per fold/repeat (not per sample) to obtain
+		// standard deviation values for global result. 
 		Map<String, List<Double>> tmpFoldEvaluations = new HashMap<String, List<Double>>();
 		for (int i = 0; i < sampleEvaluation.length; ++i) {
 			for (int j = 0; j < sampleEvaluation[i].length; ++j) {
@@ -232,7 +239,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 						MetricScore score = currentMeasures.get(math_function);
 						// preventing divisions by zero and infinite scores (given by Weka)
 						if (score.getScore() != null && score.getScore().isNaN() == false && score.getScore().isInfinite() == false) { 
-							DecimalFormat dm = MathHelper.defaultDecimalFormat;
+							DecimalFormat dm = Constants.defaultDecimalFormat;
 							EvaluationScore currentMeasure;
 							
 							Double currentScore = score.getScore() == null ? null : score.getScore();
@@ -246,8 +253,10 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 									currentScore,
 									score.getArrayAsString(dm), i, j);
 							}
-							evaluationMeasuresList.add(currentMeasure);
-							
+							// do not add individual scores for LOO
+							if (estimationProcedure.getType() != EstimationProcedureType.LEAVEONEOUT && estimationProcedure.getType() != EstimationProcedureType.TESTONTRAININGDATA) {
+								evaluationMeasuresList.add(currentMeasure);
+							}
 							if (currentScore != null && k == sampleEvaluation[i][j].length - 1) {
 								if (!tmpFoldEvaluations.containsKey(math_function)) {
 									tmpFoldEvaluations.put(math_function, new ArrayList<>());
@@ -266,7 +275,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 			MetricScore score = globalMeasures.get(math_function);
 			// preventing divisions by zero and infinite scores (given by Weka)
 			if (score.getScore() != null && score.getScore().isNaN() == false && score.getScore().isInfinite() == false) { 
-				DecimalFormat dm = MathHelper.defaultDecimalFormat;
+				DecimalFormat dm = Constants.defaultDecimalFormat;
 				Double calculated_score = score.getScore() == null ? null : score.getScore();
 				
 				Double stdev = null;

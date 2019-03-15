@@ -23,12 +23,12 @@
       <name>Jan van Rijn</name>
       <email>j.n.van.rijn@liacs.leidenuniv.nl</email>
       <url>http://www.janvanrijn.eu</url>
-      <organization>Columbia University, USA</organization>
+      <organization>Leiden University</organization>
       <roles>
-        <role>Postdoctoral Reaseacher</role>
+        <role>Assistant Professor</role>
       </roles>
     </developer>
-  </developers>
+    </developers>
   
   
   <dependencies>
@@ -39,11 +39,20 @@
       <scope>test</scope>
     </dependency>
     
+    <dependency> <!-- for running tests on tasks -->
+      <groupId>org.openml</groupId>
+      <artifactId>openmlweka</artifactId>
+      <version>0.9.7-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.21-SNAPSHOT</version>
+      <version>1.0.23-SNAPSHOT</version>
     </dependency>
+    
+    
     
     <dependency> <!-- TODO JvR: remove/replace this one!-->
       <groupId>org.mod4j.org.apache.commons</groupId>
@@ -62,7 +71,6 @@
       <artifactId>weka-stable</artifactId>
       <version>3.8.2</version>
     </dependency>
-    
   
   </dependencies>
   

@@ -115,7 +115,7 @@ public class InstanceBased {
 		return task_splits_size;
 	}
 	
-	public int calculateDifference() {
+	public int calculateDifference() throws Exception {
 		if (run_ids.size() != 2) {
 			throw new RuntimeException("Too many runs to compare. Should be 2. ");
 		}
@@ -176,9 +176,7 @@ public class InstanceBased {
 		}
 		
 		
-		try { // put it in try catch, as admin rights are required.  
-			openml.setupDifferences(setup_ids.get(0), setup_ids.get(1), task_id, task_splits_size, resultSet.size()); 
-		} catch (Exception e) {}
+		openml.setupDifferences(setup_ids.get(0), setup_ids.get(1), task_id, task_splits_size, resultSet.size()); 
 		
 		return resultSet.size();
 	}
@@ -231,7 +229,7 @@ public class InstanceBased {
 	}
 	
 	public void toStdout(String[] leadingComments) throws IOException {
-		Output.instanes2file(resultSet, new OutputStreamWriter(System.out), leadingComments);
+		Output.instances2file(resultSet, new OutputStreamWriter(System.out), leadingComments);
 	}
 	
 	private static Map<Integer,Map<Integer,Map<Integer,Map<Integer,String>>>> predictionsToHashMap(Instances predictions) {

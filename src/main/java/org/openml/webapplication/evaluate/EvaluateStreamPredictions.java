@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.openml.apiconnector.algorithms.Conversion;
-import org.openml.apiconnector.algorithms.MathHelper;
 import org.openml.apiconnector.models.MetricScore;
+import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.EvaluationScore;
 import org.openml.webapplication.algorithm.InstancesHelper;
 import org.openml.webapplication.io.Output;
@@ -127,7 +127,7 @@ public class EvaluateStreamPredictions implements PredictionEvaluator {
 		ArrayList<EvaluationScore> evaluationMeasures = new ArrayList<EvaluationScore>();
 		for( String math_function : globalMeasures.keySet() ) {
 			MetricScore score = globalMeasures.get(math_function);
-			DecimalFormat dm = MathHelper.defaultDecimalFormat;
+			DecimalFormat dm = Constants.defaultDecimalFormat;
 			evaluationMeasures.add( 
 				new EvaluationScore( 
 					math_function, 
