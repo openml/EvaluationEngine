@@ -19,8 +19,6 @@
  */
 package org.openml.webapplication.evaluate;
 
-import java.io.BufferedReader;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +29,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.json.JSONArray;
 import org.openml.apiconnector.algorithms.Conversion;
-import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.TaskInformation;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.models.MetricScore;
 import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataSetDescription;
@@ -46,6 +42,7 @@ import org.openml.webapplication.algorithm.InstancesHelper;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
@@ -76,7 +73,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private EvaluationScore[] evaluationScores;
 
-	public EvaluateBatchPredictions(OpenmlConnector openml, Task task, TaskType taskType, URL predictionsPath) throws Exception {
+	public EvaluateBatchPredictions(OpenmlWekaConnector openml, Task task, TaskType taskType, int predictionsFileId) throws Exception {
 		final int datasetId = TaskInformation.getSourceData(task).getData_set_id();
 		int epId = TaskInformation.getEstimationProcedure(task).getId();
 		estimationProcedure = openml.estimationProcedureGet(epId);
@@ -84,18 +81,10 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		this.taskType = taskType;
 		
 		// set all arff files needed for this operation.
-		URL datasetPath = openml.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName());
-		Conversion.log("OK", "EvaluateBatchPredictions", "dataset url: " + datasetPath);
-		dataset = new Instances(new BufferedReader(Input.getURL(datasetPath))); 
-		// TODO: we could use openml.getFileFromURL for more robust arff handling
-		
-		URL splitsPath = TaskInformation.getEstimationProcedure(task).getData_splits_url();
-		Conversion.log("OK", "EvaluateBatchPredictions", "splits url : " + splitsPath);
-		splits = new Instances(new BufferedReader(Input.getURL(splitsPath)));
-		// TODO: we could use openml.getFileFromURL for more robust
-		
-		predictions = new Instances(new BufferedReader(Input.getURL(predictionsPath)));
-		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsPath);
+		dataset = openml.getDataset(dsd);
+		splits = openml.getSplitsFromTask(task);
+		predictions = openml.getArffFromUrl(predictionsFileId);
+		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsFileId);
 		
 		Estimation_procedure estimationprocedure = TaskInformation.getEstimationProcedure(task);
 		this.bootstrap = estimationprocedure.getType() == EstimationProcedureType.BOOTSTRAPPING;

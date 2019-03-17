@@ -19,17 +19,18 @@
  */
 package org.openml.webapplication.evaluate;
 
-import java.io.BufferedReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openml.apiconnector.algorithms.Input;
+import org.openml.apiconnector.algorithms.TaskInformation;
+import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EvaluationScore;
+import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.Task;
 import org.openml.webapplication.algorithm.InstancesHelper;
 import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -48,11 +49,13 @@ public class EvaluateSurvivalAnalysisPredictions implements PredictionEvaluator 
 	
 	private EvaluationScore[] evaluationScores;
 	
-	public EvaluateSurvivalAnalysisPredictions( Task task, URL datasetPath, URL splitsPath, URL predictionsPath ) throws Exception {
+	public EvaluateSurvivalAnalysisPredictions(OpenmlWekaConnector openml, Task task, Run run) throws Exception {
 		// set all arff files needed for this operation. 
-		dataset 	= new Instances( new BufferedReader( Input.getURL( datasetPath ) ) );
-		predictions = new Instances( new BufferedReader( Input.getURL( predictionsPath ) ) ); 
-		splits 		= new Instances( new BufferedReader( Input.getURL( splitsPath ) ) );
+		int did = TaskInformation.getSourceData(task).getData_set_id();
+		DataSetDescription dsd = openml.dataGet(did);
+		dataset 	= openml.getDataset(dsd);
+		predictions = openml.getSplitsFromTask(task); 
+		splits 		= openml.getArffFromUrl(run.getOutputFileAsMap().get("predictions").getFileId());
 		
 		// initiate a class that will help us with checking the prediction count. 
 		predictionCounter = new FoldsPredictionCounter(splits);

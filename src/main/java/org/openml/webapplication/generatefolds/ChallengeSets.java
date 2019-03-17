@@ -1,27 +1,23 @@
 package org.openml.webapplication.generatefolds;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.Map;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.algorithms.DateParser;
-import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.TaskInformation;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
 import org.openml.apiconnector.xml.Task.Input.Stream_schedule;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.settings.Settings;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-
 
 public class ChallengeSets {
 
@@ -30,7 +26,7 @@ public class ChallengeSets {
 	private final Integer testAvailable;
 	private final Attribute targetAttribute;
 	
-	public ChallengeSets(OpenmlConnector apiconnector, Integer task_id) throws Exception {
+	public ChallengeSets(OpenmlWekaConnector apiconnector, Integer task_id) throws Exception {
 		Task current = apiconnector.taskGet(task_id);
 		
 		if (current.getTask_type_id() != 9) {
@@ -53,8 +49,7 @@ public class ChallengeSets {
 		
 		// System.out.println(secondsInProgres + "," +trainAvailable  + "," +  testAvailable);
 		
-		URL dataseturl = apiconnector.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName() + "." + dsd.getFormat());
-		dataset = new Instances(new BufferedReader(Input.getURL(dataseturl)));
+		dataset = apiconnector.getDataset(dsd);
 		targetAttribute = dataset.attribute(ds.getTarget_feature());
 	}
 	
