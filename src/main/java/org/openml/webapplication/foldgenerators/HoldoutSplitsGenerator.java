@@ -8,14 +8,15 @@ import weka.core.Instances;
 
 public class HoldoutSplitsGenerator extends FoldGeneratorBase {
 	
-	public HoldoutSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, Random random, String splitsName)  throws Exception  {
-		super(dataset, evaluationMethod, random, splitsName);
+	public HoldoutSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, int randomSeed, String splitsName)  throws Exception  {
+		super(dataset, evaluationMethod, randomSeed, splitsName);
 	}
 	
 	public Instances generate() throws Exception {
+		Random randomGenerator = new Random(randomSeed);
 		Instances splits = new Instances(splitsName, arffMapping.getArffHeader(), splitsSize);
 		for (int r = 0; r < evaluationMethod.getRepeats(); ++r) {
-			dataset.randomize(random);
+			dataset.randomize(randomGenerator);
 			int testSetSize = Math.round(dataset.numInstances() * evaluationMethod.getPercentage() / 100);
 
 			for (int i = 0; i < dataset.numInstances(); ++i) {

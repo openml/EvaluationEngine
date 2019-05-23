@@ -1,7 +1,5 @@
 package org.openml.webapplication.foldgenerators;
 
-import java.util.Random;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.openml.apiconnector.xml.EstimationProcedure;
 import org.openml.apiconnector.xml.EstimationProcedureType;
@@ -15,16 +13,16 @@ public abstract class FoldGeneratorBase implements FoldGeneratorInterface {
 	
 	protected final Instances dataset;
 	protected final EstimationProcedure evaluationMethod;
-	protected final Random random;
+	protected final Integer randomSeed;
 	protected final int splitsSize;
 	protected final ArffMapping arffMapping;
 	protected final String splitsName;
 	
-	public FoldGeneratorBase(Instances dataset, EstimationProcedure evaluationMethod, Random random, String splitsName) throws Exception {
+	public FoldGeneratorBase(Instances dataset, EstimationProcedure evaluationMethod, Integer randomSeed, String splitsName) throws Exception {
 		// adds row id. guarantees sorting, we are not allowed to use official row_id, even if it exist,
 		// since there is no guarantee that this runs from 0 -> n - 1
 		this.dataset = addRowId(dataset, "temp_row_id");
-		this.random = random;
+		this.randomSeed = randomSeed;
 		this.evaluationMethod = evaluationMethod;
 		this.splitsName = splitsName;
 		

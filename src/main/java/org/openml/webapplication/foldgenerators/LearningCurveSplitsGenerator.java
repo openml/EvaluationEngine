@@ -9,14 +9,15 @@ import weka.core.Instances;
 
 public class LearningCurveSplitsGenerator extends FoldGeneratorBase {
 	
-	public LearningCurveSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, Random random, String splitsName)  throws Exception  {
-		super(dataset, evaluationMethod, random, splitsName);
+	public LearningCurveSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, int randomSeed, String splitsName)  throws Exception  {
+		super(dataset, evaluationMethod, randomSeed, splitsName);
 	}
 	
 	public Instances generate() throws Exception {
+		Random randomGenerator = new Random(randomSeed);
 		Instances splits = new Instances(splitsName, arffMapping.getArffHeader(), splitsSize);
 		for (int r = 0; r < evaluationMethod.getRepeats(); ++r) {
-			dataset.randomize(random);
+			dataset.randomize(randomGenerator);
 			if (dataset.classAttribute().isNominal()) {
 				InstancesHelper.stratify(dataset); // do our own stratification
 			}

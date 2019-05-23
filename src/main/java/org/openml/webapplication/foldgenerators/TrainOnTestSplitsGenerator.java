@@ -1,15 +1,13 @@
 package org.openml.webapplication.foldgenerators;
 
-import java.util.Random;
-
 import org.openml.apiconnector.xml.EstimationProcedure;
 
 import weka.core.Instances;
 
 public class TrainOnTestSplitsGenerator extends FoldGeneratorBase {
 	
-	public TrainOnTestSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, Random random, String splitsName) throws Exception {
-		super(dataset, evaluationMethod, random, splitsName);
+	public TrainOnTestSplitsGenerator(Instances dataset, EstimationProcedure evaluationMethod, String splitsName) throws Exception {
+		super(dataset, evaluationMethod, null, splitsName);
 	}
 	
 	public Instances generate() throws Exception {

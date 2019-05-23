@@ -20,7 +20,6 @@
 package org.openml.webapplication.generatefolds;
 
 import java.io.FileReader;
-import java.util.Random;
 
 import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -49,24 +48,23 @@ public class GenerateFolds {
 		Instances dataset = new Instances(new FileReader(ac.datasetGet(dsd)));
 		InstancesHelper.setTargetAttribute(dataset, TaskInformation.getSourceData(task).getTarget_feature());
 		EstimationProcedure evaluationMethod = ac.estimationProcedureGet(epId);
-		Random random = new Random(randomSeed);
 		String splitsName = dsd.getName() + "_splits";
 		
 		switch (evaluationMethod.getType()) {
 			case HOLDOUT:
-				foldGenerator = new HoldoutSplitsGenerator(dataset, evaluationMethod, random, splitsName);
+				foldGenerator = new HoldoutSplitsGenerator(dataset, evaluationMethod, randomSeed, splitsName);
 				break;
 			case HOLDOUT_ORDERED:
-				foldGenerator = new HoldoutOrderedSplitsGenerator(dataset, evaluationMethod, random, splitsName);
+				foldGenerator = new HoldoutOrderedSplitsGenerator(dataset, evaluationMethod, splitsName);
 				break;
 			case CROSSVALIDATION:
-				foldGenerator = new CrossValidationSplitsGenerator(dataset, evaluationMethod, random, splitsName);
+				foldGenerator = new CrossValidationSplitsGenerator(dataset, evaluationMethod, randomSeed, splitsName);
 				break;
 			case LEAVEONEOUT:
-				foldGenerator = new LeaveOneOutSplitsGenerator(dataset, evaluationMethod, random, splitsName);
+				foldGenerator = new LeaveOneOutSplitsGenerator(dataset, evaluationMethod, splitsName);
 				break;
 			case TESTONTRAININGDATA:
-				foldGenerator = new TrainOnTestSplitsGenerator(dataset, evaluationMethod, random, splitsName);
+				foldGenerator = new TrainOnTestSplitsGenerator(dataset, evaluationMethod, splitsName);
 				break;
 			default:
 				throw new RuntimeException("Illegal evaluationMethod (GenerateFolds::generateInstances)");
