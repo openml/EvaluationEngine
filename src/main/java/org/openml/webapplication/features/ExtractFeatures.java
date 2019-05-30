@@ -58,13 +58,21 @@ public class ExtractFeatures {
 	}
 	
 	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
-		
 		Set<String> dataClasses = checkDataClasses(dataset, defaultClass);
+		if (dataClasses.size() == 1) {
+			dataset.setClass(dataset.attribute(defaultClass));
+		}
+		
 		final ArrayList<Feature> resultFeatures = new ArrayList<Feature>();
 		
 		for (int i = 0; i < dataset.numAttributes(); i++) {
 			Attribute att = dataset.attribute(i);
-			int numValues = dataset.classAttribute().isNominal() ? dataset.classAttribute().numValues() : 0;
+			int numValues = 1;
+			if (dataset.classAttribute() != null) {
+				// default is 1, in case of regression
+				numValues = dataset.numClasses();
+			}
+			
 			AttributeStatistics attributeStats = new AttributeStatistics(dataset.attribute(i),numValues);
 		
 			for (int j = 0; j < dataset.numInstances(); ++j) {
