@@ -39,17 +39,17 @@
       <scope>test</scope>
     </dependency>
     
-    <dependency> <!-- for running tests on tasks -->
+    <dependency> <!-- for running tests on tasks and connector -->
       <groupId>org.openml</groupId>
       <artifactId>openmlweka</artifactId>
       <version>0.9.7-SNAPSHOT</version>
-      <scope>test</scope>
+      <!-- <scope>test</scope> -->
     </dependency>
     
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.23-SNAPSHOT</version>
+      <version>1.0.23</version>
     </dependency>
     
     

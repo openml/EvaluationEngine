@@ -20,7 +20,10 @@
 package org.openml.webapplication.features;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.xml.DataFeature.Feature;
@@ -34,17 +37,29 @@ public class ExtractFeatures {
 	
 	private static final int MAX_SIZE_CLASS_DISTR = 16384;
 	
-	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
-		if (defaultClass != null) {
-			if(defaultClass.contains(",")){
-				dataset.setClass(dataset.attribute(defaultClass.split(",")[0]));
-			} else {
-				dataset.setClass(dataset.attribute(defaultClass));
-			}
-		} else {
-			dataset.setClassIndex(dataset.numAttributes()-1);
+	private static Set<String> checkDataClasses(Instances dataset, String defaultClass) throws Exception {
+		if (defaultClass == null) {
+			return new TreeSet<String>();
 		}
 		
+		String[] dataClasses = defaultClass.split(",");
+		Set<String> classesNotFound = new TreeSet<String>();
+		for (String dataClass : dataClasses) {
+			if (dataset.attribute(dataClass) == null) {
+				classesNotFound.add(dataClass);
+			}
+		}
+		
+		if (classesNotFound.size() > 0) {
+			throw new Exception("Default target attribute(s) could not be found: " + classesNotFound);
+		}
+		
+		return new TreeSet<String>(Arrays.asList(dataClasses));
+	}
+	
+	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
+		
+		Set<String> dataClasses = checkDataClasses(dataset, defaultClass);
 		final ArrayList<Feature> resultFeatures = new ArrayList<Feature>();
 		
 		for (int i = 0; i < dataset.numAttributes(); i++) {
@@ -119,7 +134,7 @@ public class ExtractFeatures {
 			}
 			resultFeatures.add(new Feature(att.index(), att.name(), 
 					data_type, nominal_values.toArray(new String[nominal_values.size()]),
-					att.index() == dataset.classIndex(), 
+					dataClasses.contains(att.name()), 
 					numberOfDistinctValues,
 					numberOfUniqueValues, numberOfMissingValues,
 					numberOfIntegerValues, numberOfRealValues,

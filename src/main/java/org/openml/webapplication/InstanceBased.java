@@ -1,21 +1,18 @@
 package org.openml.webapplication;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.TaskInformation;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.Run;
 import org.openml.apiconnector.xml.Task;
 import org.openml.webapplication.io.Output;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -30,7 +27,7 @@ public class InstanceBased {
 	
 	private final int task_splits_size;
 	
-	private final OpenmlConnector openml;
+	private final OpenmlWekaConnector openml;
 	private final List<Integer> run_ids;
 	private final List<Integer> setup_ids;
 	private final Map<Integer,Run> runs;
@@ -39,7 +36,7 @@ public class InstanceBased {
 	
 	private Instances resultSet;
 	
-	public InstanceBased(OpenmlConnector openml, List<Integer> run_ids, Integer task_id) throws Exception {
+	public InstanceBased(OpenmlWekaConnector openml, List<Integer> run_ids, Integer task_id) throws Exception {
 		this.run_ids = run_ids;
 		this.openml = openml;
 		
@@ -57,8 +54,7 @@ public class InstanceBased {
 		
 
 		DataSetDescription dsd = openml.dataGet(TaskInformation.getSourceData(currentTask).getData_set_id());
-		dataset = new Instances(new BufferedReader(Input.getURL(openml.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName()))));
-		
+		dataset = openml.getDataset(dsd);
 		
 		if (currentTask.getTask_type().equals("Supervised Data Stream Classification")) {
 			// simulate task splits file. 
@@ -80,8 +76,7 @@ public class InstanceBased {
 				task_splits.add(new DenseInstance(1.0, attValues));
 			}
 		} else {
-			URL taskUrl = TaskInformation.getEstimationProcedure(currentTask).getData_splits_url();
-			task_splits = new Instances(new BufferedReader(Input.getURL(taskUrl)));
+			task_splits = openml.getSplitsFromTask(currentTask);
 		}
 			
 		for (Integer run_id : run_ids) {
@@ -94,8 +89,7 @@ public class InstanceBased {
 			for (Run.Data.File f : outputFiles) {
 				if (f.getName().equals("predictions")) {
 					found = true;
-					URL predictionsURL = openml.getOpenmlFileUrl(f.getFileId(), f.getName());
-					Instances runPredictions = new Instances(new BufferedReader(Input.getURL(predictionsURL)));
+					Instances runPredictions = openml.getArffFromUrl(f.getFileId());
 					predictions.put(run_id,predictionsToHashMap(runPredictions));
 				}
 			}

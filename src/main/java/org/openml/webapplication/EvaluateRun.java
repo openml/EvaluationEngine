@@ -1,6 +1,5 @@
 package org.openml.webapplication;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,11 +12,9 @@ import java.util.TreeMap;
 import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.openml.apiconnector.algorithms.Conversion;
-import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.io.HttpConnector;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EvaluationRequest;
 import org.openml.apiconnector.xml.EvaluationScore;
@@ -26,7 +23,6 @@ import org.openml.apiconnector.xml.RunEvaluation;
 import org.openml.apiconnector.xml.RunTrace;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input.Data_set;
-import org.openml.apiconnector.xml.Task.Input.Estimation_procedure;
 import org.openml.apiconnector.xstream.XstreamXmlMapping;
 import org.openml.webapplication.evaluate.EvaluateBatchPredictions;
 import org.openml.webapplication.evaluate.EvaluateStreamPredictions;
@@ -35,6 +31,7 @@ import org.openml.webapplication.evaluate.PredictionEvaluator;
 import org.openml.webapplication.evaluate.TaskType;
 import org.openml.webapplication.settings.ApiErrorMapping;
 import org.openml.webapplication.settings.Settings;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -44,14 +41,14 @@ import com.thoughtworks.xstream.XStream;
 
 public class EvaluateRun {
 	private final XStream xstream;
-	private final OpenmlConnector apiconnector;
+	private final OpenmlWekaConnector apiconnector;
 	private final int MAX_LENGTH_WARNING = 1024;
 	
-	public EvaluateRun(OpenmlConnector ac) throws Exception {
+	public EvaluateRun(OpenmlWekaConnector ac) throws Exception {
 		this(ac, null, "normal", null, null, null, null);
 	}
 	
-	public EvaluateRun(OpenmlConnector ac, Integer run_id, String evaluationMode, int[] ttids, String taskIds, String tag, Integer uploaderId) throws Exception {
+	public EvaluateRun(OpenmlWekaConnector ac, Integer run_id, String evaluationMode, int[] ttids, String taskIds, String tag, Integer uploaderId) throws Exception {
 		apiconnector = ac;
 		xstream = XstreamXmlMapping.getInstance();
 		if(run_id != null) {
@@ -110,8 +107,6 @@ public class EvaluateRun {
 		final Data_set source_data = TaskInformation.getSourceData(task);
 		final Integer dataset_id = source_data.getLabeled_data_set_id() != null ? source_data.getLabeled_data_set_id() : source_data.getData_set_id();
 		final Integer task_id = runServer.getTask_id();
-		Estimation_procedure estimationprocedure = null;
-		try { estimationprocedure = TaskInformation.getEstimationProcedure(task); } catch(Exception e) {}
 		
 		PredictionEvaluator predictionEvaluator;
 		RunEvaluation runevaluation = new RunEvaluation(runId, Settings.EVALUATION_ENGINE_ID);
@@ -142,6 +137,7 @@ public class EvaluateRun {
 				trace = traceToXML(runFiles.get("trace").getFileId(), task_id, runId);
 			}
 			String description_url = apiconnector.getOpenmlFileUrl(runFiles.get("description").getFileId(), "Run_" + runId + "_description.xml").toString();
+			// we do not get the "real" run, as this does not contain user defined evaluations
 			File runDescriptionFile = HttpConnector.getTempFileFromUrl(new URL(description_url), "xml");
 			String description = Conversion.fileToString(runDescriptionFile);
 			
@@ -157,27 +153,25 @@ public class EvaluateRun {
 				URL predictionsUrl = apiconnector.getOpenmlFileUrl(runFiles.get("predictions").getFileId(), filename_prefix + "predictions.arff");
 				predictionEvaluator = new EvaluateStreamPredictions(datasetUrl, predictionsUrl, source_data.getTarget_feature());
 			} else if (task.getTask_type_id() == 7) { //Survival Analysis
-				URL predictionsUrl = apiconnector.getOpenmlFileUrl(runFiles.get("predictions").getFileId(), filename_prefix + "predictions.arff");
-				URL splitsUrl = estimationprocedure.getData_splits_url();
-				predictionEvaluator = new EvaluateSurvivalAnalysisPredictions(task, datasetUrl, splitsUrl, predictionsUrl);
+				predictionEvaluator = new EvaluateSurvivalAnalysisPredictions(apiconnector, task, run_description);
 			} else if (task.getTask_type_id() == 2) {
 				predictionEvaluator = new EvaluateBatchPredictions( 
 					apiconnector,
 					task,
 					TaskType.REGRESSION,
-					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+					runFiles.get( "predictions" ).getFileId());
 			} else if (task.getTask_type_id() == 3) {
 				predictionEvaluator = new EvaluateBatchPredictions( 
 					apiconnector,
 					task,
 					TaskType.LEARNINGCURVE,
-					apiconnector.getOpenmlFileUrl( runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+					runFiles.get( "predictions" ).getFileId());
 			} else if (task.getTask_type_id() == 1 || task.getTask_type_id() == 5 || task.getTask_type_id() == 6 || task.getTask_type_id() == 8) {
 				predictionEvaluator = new EvaluateBatchPredictions( 
 					apiconnector,
 					task,
 					TaskType.CLASSIFICATION,
-					apiconnector.getOpenmlFileUrl(runFiles.get( "predictions" ).getFileId(), filename_prefix + "predictions.arff"));
+					runFiles.get( "predictions" ).getFileId());
 			} else {
 				throw new Exception("Unsupported Task Type: " + task.getTask_type_id());
 			}
@@ -253,8 +247,7 @@ public class EvaluateRun {
 	
 	private RunTrace traceToXML(int file_id, int task_id, int run_id) throws Exception {
 		RunTrace trace = new RunTrace(run_id);
-		URL traceURL = apiconnector.getOpenmlFileUrl(file_id, "Task_" + task_id + "_trace.arff");
-		Instances traceDataset = new Instances(new BufferedReader(Input.getURL(traceURL)));
+		Instances traceDataset = apiconnector.getArffFromUrl(file_id);
 		List<Integer> parameterIndexes = new ArrayList<Integer>();
 		
 		if (traceDataset.attribute("repeat") == null || 

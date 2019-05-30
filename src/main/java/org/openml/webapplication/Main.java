@@ -28,7 +28,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Config;
 import org.openml.apiconnector.settings.Settings;
 import org.openml.webapplication.features.CharacterizerFactory;
@@ -36,6 +35,7 @@ import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.generatefolds.ChallengeSets;
 import org.openml.webapplication.generatefolds.GenerateFolds;
 import org.openml.webapplication.io.Output;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Instances;
 
@@ -44,7 +44,7 @@ public class Main {
 	public static final int FOLD_GENERATION_SEED = 0;
 	
 	public static void main( String[] args ) {
-		OpenmlConnector apiconnector;
+		OpenmlWekaConnector apiconnector;
 		CommandLineParser parser = new GnuParser();
 		Options options = new Options();
 		Integer id = null;
@@ -77,9 +77,9 @@ public class Main {
 			Settings.CACHE_ALLOWED = false;
 			
 			if (config.getServer() != null) {
-				apiconnector = new OpenmlConnector(config.getServer(),config.getApiKey());
+				apiconnector = new OpenmlWekaConnector(config.getServer(),config.getApiKey());
 			} else {
-				apiconnector = new OpenmlConnector(config.getApiKey());
+				apiconnector = new OpenmlWekaConnector(Settings.BASE_URL, config.getApiKey());
 			}
 			
 			if (cli.hasOption("v")) {

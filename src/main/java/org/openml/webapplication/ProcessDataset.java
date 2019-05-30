@@ -1,13 +1,9 @@
 package org.openml.webapplication;
 
-import java.io.BufferedReader;
-import java.net.URL;
 import java.util.List;
 
 import org.openml.apiconnector.algorithms.Conversion;
-import org.openml.apiconnector.algorithms.Input;
 import org.openml.apiconnector.io.ApiException;
-import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataFeature.Feature;
@@ -17,18 +13,19 @@ import org.openml.webapplication.features.CharacterizerFactory;
 import org.openml.webapplication.features.ExtractFeatures;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.settings.Settings;
+import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Instances;
 
 public class ProcessDataset {
 
-	private final OpenmlConnector apiconnector;
+	private final OpenmlWekaConnector apiconnector;
 	
-	public ProcessDataset(OpenmlConnector ac, String mode) throws Exception {
+	public ProcessDataset(OpenmlWekaConnector ac, String mode) throws Exception {
 		this(ac, null, mode);
 	}
 	
-	public ProcessDataset(OpenmlConnector connector, Integer dataset_id, String mode) throws Exception {
+	public ProcessDataset(OpenmlWekaConnector connector, Integer dataset_id, String mode) throws Exception {
 		apiconnector = connector;
 		if(dataset_id != null) {
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dataset_id + " on special request. ");
@@ -49,12 +46,11 @@ public class ProcessDataset {
 	public void process(Integer did) throws Exception {
 
 		DataSetDescription dsd = apiconnector.dataGet(did);
-		URL datasetURL = apiconnector.getOpenmlFileUrl(dsd.getFile_id(), dsd.getName() + "." + dsd.getFormat());
 		String defaultTarget = dsd.getDefault_target_attribute();
 		
 		try {
 			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
-			Instances dataset = new Instances(new BufferedReader(Input.getURL(datasetURL)));
+			Instances dataset = apiconnector.getDataset(dsd);
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
 			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
