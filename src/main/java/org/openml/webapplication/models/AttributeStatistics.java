@@ -53,7 +53,7 @@ public class AttributeStatistics {
 		minimum = Double.MAX_VALUE;
 		maximum = Double.MIN_VALUE;
 		
-		if (numClasses > 0 && att.isNominal()) {
+		if (numClasses > 1 && att.isNominal()) {
 			trackClassDistribution = true;
 			classDistribution = new int[att.numValues()][numClasses];
 		} else {
