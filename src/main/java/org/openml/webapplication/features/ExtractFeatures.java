@@ -58,17 +58,31 @@ public class ExtractFeatures {
 	}
 	
 	public static List<Feature> getFeatures(Instances dataset, String defaultClass) throws Exception {
-		
 		Set<String> dataClasses = checkDataClasses(dataset, defaultClass);
+		if (dataClasses.size() == 1) {
+			dataset.setClass(dataset.attribute(defaultClass));
+		}
+		
 		final ArrayList<Feature> resultFeatures = new ArrayList<Feature>();
 		
 		for (int i = 0; i < dataset.numAttributes(); i++) {
 			Attribute att = dataset.attribute(i);
-			int numValues = dataset.classAttribute().isNominal() ? dataset.classAttribute().numValues() : 0;
-			AttributeStatistics attributeStats = new AttributeStatistics(dataset.attribute(i),numValues);
+			Integer numClassValues = null;
+			// numClassValues will be null in all cases except for classification datasets
+			if (dataset.classIndex() >= 0) {
+				if (dataset.classAttribute().isNominal()) {
+					numClassValues = dataset.numClasses();
+				}
+			}
+			
+			AttributeStatistics attributeStats = new AttributeStatistics(dataset.attribute(i), numClassValues);
 		
 			for (int j = 0; j < dataset.numInstances(); ++j) {
-				attributeStats.addValue(dataset.get(j).value(i), dataset.get(j).classValue());
+				if (numClassValues != null) {
+					attributeStats.addValue(dataset.get(j).value(i), dataset.get(j).classValue());
+				} else {
+					attributeStats.addValue(dataset.get(j).value(i));
+				}
 			}
 			
 			String data_type = null;

@@ -44,8 +44,9 @@ public class AttributeStatistics {
 	private Attribute attribute;
 	
 	// numClasses / numValues can be used for tracking classDistribution
-	public AttributeStatistics(Attribute att, int numClasses) { 
-		attribute = att;
+	public AttributeStatistics(Attribute attribute, Integer numClasses) {
+		// numClasses is null in case of regression dataset
+		this.attribute = attribute;
 		totalSum = new BigDecimal(0);
 		totalSumSquared = new BigDecimal(0);
 		totalObservations = 0;
@@ -53,13 +54,21 @@ public class AttributeStatistics {
 		minimum = Double.MAX_VALUE;
 		maximum = Double.MIN_VALUE;
 		
-		if (numClasses > 0 && att.isNominal()) {
+		if (attribute.isNominal() && numClasses != null) {
 			trackClassDistribution = true;
-			classDistribution = new int[att.numValues()][numClasses];
+			classDistribution = new int[attribute.numValues()][numClasses];
 		} else {
 			trackClassDistribution = false;
 			classDistribution = new int[0][0];
 		}
+	}
+	
+
+	public void addValue(double value) throws Exception {
+		if (trackClassDistribution) {
+			throw new Exception("This function can not be invoked when tracking class distribution. ");
+		}
+		addValue(value, -1.0);
 	}
 	
 	public void addValue(double value, double classValue) {

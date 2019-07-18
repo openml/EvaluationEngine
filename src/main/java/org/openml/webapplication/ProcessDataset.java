@@ -52,7 +52,7 @@ public class ProcessDataset {
 			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
 			Instances dataset = apiconnector.getDataset(dsd);
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
-			List<Feature> features = ExtractFeatures.getFeatures(dataset,defaultTarget);
+			List<Feature> features = ExtractFeatures.getFeatures(dataset, defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
 			int receivedId = apiconnector.dataFeaturesUpload(datafeature);
 			
