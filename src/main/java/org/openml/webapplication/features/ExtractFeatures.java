@@ -67,16 +67,22 @@ public class ExtractFeatures {
 		
 		for (int i = 0; i < dataset.numAttributes(); i++) {
 			Attribute att = dataset.attribute(i);
-			int numValues = 1;
-			if (dataset.classAttribute() != null) {
-				// default is 1, in case of regression
-				numValues = dataset.numClasses();
+			Integer numClassValues = null;
+			// numClassValues will be null in all cases except for classification datasets
+			if (dataset.classIndex() >= 0) {
+				if (dataset.classAttribute().isNominal()) {
+					numClassValues = dataset.numClasses();
+				}
 			}
 			
-			AttributeStatistics attributeStats = new AttributeStatistics(dataset.attribute(i),numValues);
+			AttributeStatistics attributeStats = new AttributeStatistics(dataset.attribute(i), numClassValues);
 		
 			for (int j = 0; j < dataset.numInstances(); ++j) {
-				attributeStats.addValue(dataset.get(j).value(i), dataset.get(j).classValue());
+				if (numClassValues != null) {
+					attributeStats.addValue(dataset.get(j).value(i), dataset.get(j).classValue());
+				} else {
+					attributeStats.addValue(dataset.get(j).value(i));
+				}
 			}
 			
 			String data_type = null;
