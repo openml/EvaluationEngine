@@ -40,8 +40,8 @@
 
   <scm>
     <connection>scm:git:https://github.com/openml/java</connection>
-    <developerConnection>scm:git:https://github.com/openml/java</developerConnection>
-    <url>https://github.com/openml/java</url>
+    <developerConnection>scm:git:https://github.com/openml/EvaluationEngine</developerConnection>
+    <url>https://github.com/openml/EvaluationEngine</url>
     <tag>EvaluationEngine-0.1.0</tag>
   </scm>
 
