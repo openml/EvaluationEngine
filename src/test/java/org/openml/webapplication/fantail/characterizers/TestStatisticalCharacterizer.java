@@ -62,7 +62,7 @@ public class TestStatisticalCharacterizer {
 		double mean = 0.5;
 		double stdev = 0.5773502691896257; 
 		double skewness = 0.0;
-		double kurtosis = -6.0; // TODO: this is probably a bug!
+		double kurtosis = -6.0;
 		
 		Map<String, Double> results = new TreeMap<String, Double>();
 		results.put("MeanMeansOfNumericAtts", mean);
