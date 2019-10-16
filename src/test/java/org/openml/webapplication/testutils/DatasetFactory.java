@@ -10,6 +10,8 @@ import weka.core.Instances;
 
 public class DatasetFactory {
 	
+	private static final double DELTA = 1E-8;
+	
 	public static final Instances getXORNumericNoClass() {
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(new Attribute("x1"));
@@ -127,7 +129,7 @@ public class DatasetFactory {
 				if (expected.get(feature) != null) {
 					differences.add(feature);
 				}
-			} else if (!result.get(feature).equals(expected.get(feature))) {
+			} else if (Math.abs(result.get(feature) - expected.get(feature)) > DELTA) {
 				differences.add(feature);
 			}
 		}
