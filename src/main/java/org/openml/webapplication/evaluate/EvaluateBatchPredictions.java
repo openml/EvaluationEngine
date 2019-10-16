@@ -44,7 +44,6 @@ import org.openml.webapplication.predictionCounter.FoldsPredictionCounter;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
 import org.openml.weka.io.OpenmlWekaConnector;
 
-import weka.classifiers.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -68,7 +67,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 	private final EstimationProcedure estimationProcedure;
 	private final TaskType taskType;
 	private final JSONArray cost_matrix;
-	private final Evaluation[][][][] sampleEvaluation;
+	private final OpenMLEvaluation[][][][] sampleEvaluation;
 	private final boolean bootstrap;
 
 	private EvaluationScore[] evaluationScores;
@@ -101,7 +100,7 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		// initiate a class that will help us with checking the prediction
 		// count.
 		predictionCounter = new FoldsPredictionCounter(splits);
-		sampleEvaluation = new Evaluation[predictionCounter.getRepeats()][predictionCounter
+		sampleEvaluation = new OpenMLEvaluation[predictionCounter.getRepeats()][predictionCounter
 				.getFolds()][predictionCounter.getSamples()][bootstrap ? 2 : 1];
 
 		// *** A sample is considered to be a subset of a fold. In a normal
@@ -144,15 +143,15 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 
 	private void doEvaluation() throws Exception {
 		// set global evaluation
-		Evaluation[] globalEvaluator = new Evaluation[bootstrap ? 2 : 1];
+		OpenMLEvaluation[] globalEvaluator = new OpenMLEvaluation[bootstrap ? 2 : 1];
 
 		for (int i = 0; i < globalEvaluator.length; ++i) {
-			globalEvaluator[i] = new Evaluation(dataset);
+			globalEvaluator[i] = new OpenMLEvaluation(dataset);
 			if (cost_matrix != null) {
 				// TODO test
-				globalEvaluator[i] = new Evaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
+				globalEvaluator[i] = new OpenMLEvaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
 			} else {
-				globalEvaluator[i] = new Evaluation(dataset);
+				globalEvaluator[i] = new OpenMLEvaluation(dataset);
 			}
 		}
 
@@ -163,9 +162,9 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 					for (int m = 0; m < (bootstrap ? 2 : 1); ++m) {
 						if (cost_matrix != null) {
 							// TODO test
-							sampleEvaluation[i][j][k][m] = new Evaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
+							sampleEvaluation[i][j][k][m] = new OpenMLEvaluation(dataset, InstancesHelper.doubleToCostMatrix(cost_matrix));
 						} else {
-							sampleEvaluation[i][j][k][m] = new Evaluation(dataset);
+							sampleEvaluation[i][j][k][m] = new OpenMLEvaluation(dataset);
 						}
 					}
 				}

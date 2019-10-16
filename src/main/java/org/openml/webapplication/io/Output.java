@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openml.apiconnector.models.MetricScore;
+import org.openml.webapplication.evaluate.OpenMLEvaluation;
 import org.openml.webapplication.evaluate.TaskType;
 import org.openml.webapplication.models.JsonItem;
 
@@ -39,7 +40,7 @@ public class Output {
 	/*
 	 * Transforms a Weka Evaluation object into a HashMap with scores.
 	 */
-	public static Map<String, MetricScore> evaluatorToMap(Evaluation evaluator, int classes, TaskType task) throws Exception {
+	public static Map<String, MetricScore> evaluatorToMap(OpenMLEvaluation evaluator, int classes, TaskType task) throws Exception {
 		Map<String, MetricScore> m = new HashMap<String, MetricScore>();
 
 		if (task == TaskType.REGRESSION) {
@@ -108,6 +109,7 @@ public class Output {
 			m.put("precision",
 					new MetricScore(evaluator.weightedPrecision(), precision, (int) evaluator.numInstances()));
 			m.put("recall", new MetricScore(evaluator.weightedRecall(), recall, (int) evaluator.numInstances()));
+			m.put("unweighted_recall", new MetricScore(evaluator.unweightedRecall(), recall, (int) evaluator.numInstances()));
 			m.put("f_measure", new MetricScore(evaluator.weightedFMeasure(), fMeasure, (int) evaluator.numInstances()));
 			if (Utils.isMissingValue(evaluator.weightedAreaUnderROC()) == false) {
 				m.put("area_under_roc_curve",
@@ -124,7 +126,7 @@ public class Output {
 	 * (otherwise) elements. evaluator[0] contains all unseen instances,
 	 * evaluator[1] contains all instances that occured in the trainings set.
 	 */
-	public static Map<String, MetricScore> evaluatorToMap(Evaluation[] evaluator, int classes, TaskType task, boolean bootstrap) throws Exception {
+	public static Map<String, MetricScore> evaluatorToMap(OpenMLEvaluation[] evaluator, int classes, TaskType task, boolean bootstrap) throws Exception {
 		if (bootstrap && evaluator.length != 2) {
 			throw new Exception("Output->evaluatorToMap problem: Can not perform bootstrap scores, evaluation array is of wrong length. ");
 		} else if (bootstrap == false && evaluator.length != 1) {
