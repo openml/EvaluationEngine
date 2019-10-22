@@ -45,7 +45,7 @@ public class CharacterizerFactory {
 	}
 	
 	public static List<Characterizer> simple() {
-		Characterizer[] characterizers = { new SimpleMetaFeatures() }; // DO NOT ADD!
+		Characterizer[] characterizers = { new SimpleMetaFeatures() }; // DO NOT ADD OTHERS, heapspace!
 		List<Characterizer> batchCharacterizers = new ArrayList<>(Arrays.asList(characterizers));
 		return batchCharacterizers;
 	}
