@@ -72,6 +72,8 @@ public class GenerateFolds {
 	}
 	
 	public Instances getSplits() throws Exception {
+		// note that the openml evaluation engine does not have a caching mechanism, this is done
+		// on task level
 		return foldGenerator.generate();
 	}
 }
