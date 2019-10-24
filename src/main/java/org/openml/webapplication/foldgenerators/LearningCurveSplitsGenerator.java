@@ -40,4 +40,8 @@ public class LearningCurveSplitsGenerator extends FoldGeneratorBase {
 		}
 		return splits;
 	}
+	
+	public Instances generate_learningcurve() throws Exception {
+		throw new Exception("Learning Curve samples not defined for this SplitGenerator");
+	}
 }

@@ -21,6 +21,7 @@ package org.openml.webapplication.generatefolds;
 
 import java.io.FileReader;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.openml.apiconnector.algorithms.TaskInformation;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
@@ -33,15 +34,18 @@ import org.openml.webapplication.foldgenerators.HoldoutOrderedSplitsGenerator;
 import org.openml.webapplication.foldgenerators.HoldoutSplitsGenerator;
 import org.openml.webapplication.foldgenerators.LeaveOneOutSplitsGenerator;
 import org.openml.webapplication.foldgenerators.TrainOnTestSplitsGenerator;
+import org.openml.webapplication.settings.Settings;
 
 import weka.core.Instances;
 
 public class GenerateFolds {
 	
 	private final FoldGeneratorInterface foldGenerator;
+	private final int ttid;
 	
 	public GenerateFolds(OpenmlConnector ac, int taskId, int randomSeed) throws Exception {
 		Task task = ac.taskGet(taskId);
+		ttid = task.getTask_type_id();
 		int epId = TaskInformation.getEstimationProcedure(task).getId();
 		int did = TaskInformation.getSourceData(task).getData_set_id();
 		DataSetDescription dsd = ac.dataGet(did);
@@ -74,6 +78,10 @@ public class GenerateFolds {
 	public Instances getSplits() throws Exception {
 		// note that the openml evaluation engine does not have a caching mechanism, this is done
 		// on task level
-		return foldGenerator.generate();
+		if (ArrayUtils.contains(Settings.LEARNING_CURVE_TASK_IDS, ttid)) {
+			return foldGenerator.generate_learningcurve();
+		} else {
+			return foldGenerator.generate();
+		}
 	}
 }
