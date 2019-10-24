@@ -9,7 +9,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.json.JSONArray;
 import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.TaskInputs;
 import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Attribute;
@@ -25,6 +27,24 @@ public class MergeDataset {
 	
 	public MergeDataset() {
 		this.datasets = new TreeMap<String, Instances>();
+	}
+	
+	public MergeDataset(int taskId, OpenmlWekaConnector openml) throws Exception {
+		this.datasets = new TreeMap<String, Instances>();
+		TaskInputs ti = openml.taskInputs(taskId);
+		
+		if (ti.getTask_type_id() != 9) {
+			throw new Exception("Can only invoke this function on task type 9. ");
+		}
+		JSONArray jsonArray = new JSONArray(ti.getInputsAsMap().get("transfer_data"));
+		Set<Integer> dataIds = new TreeSet<Integer>();
+		for (int i = 0; i < jsonArray.length(); ++i) {
+
+			dataIds.add(jsonArray.getInt(i));
+		}
+		dataIds.add(Integer.parseInt(ti.getInputsAsMap().get("source_data")));
+		
+		downloadDatasets(openml, new ArrayList<Integer>(dataIds));
 	}
 	
 	public void downloadDatasets(OpenmlWekaConnector openml, List<Integer> datasetIds) throws Exception {

@@ -123,6 +123,16 @@ public class Main {
 					FantailConnector fc = new FantailConnector(apiconnector, CharacterizerFactory.simple());
 					fc.start(id, mode, cli.getOptionValue("tag"), null);
 					fc.toString();
+				} else if (function.equals("merge_datasets")) {
+					MergeDataset md = new MergeDataset(Integer.parseInt(cli.getOptionValue("id")), apiconnector);
+					
+					Instances merged = md.merge();
+					if (cli.hasOption("o") == true) {
+						FileWriter f = new FileWriter(cli.getOptionValue("o"));
+						Output.instances2file(merged, f, null);
+					} else {
+						Output.instances2file(merged, new OutputStreamWriter(System.out), null);
+					}
 				} else if (function.equals("generate_folds")) {
 					GenerateFolds gf = new GenerateFolds(apiconnector, Integer.parseInt(cli.getOptionValue("id")), FOLD_GENERATION_SEED);
 					Instances splits = gf.getSplits();
