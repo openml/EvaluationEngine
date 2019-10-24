@@ -36,13 +36,11 @@ public class MergeDataset {
 		if (ti.getTask_type_id() != 9) {
 			throw new Exception("Can only invoke this function on task type 9. ");
 		}
-		JSONArray jsonArray = new JSONArray(ti.getInputsAsMap().get("transfer_data"));
+		JSONArray jsonArray = new JSONArray(ti.getInputsAsMap().get("source_data_list"));
 		Set<Integer> dataIds = new TreeSet<Integer>();
 		for (int i = 0; i < jsonArray.length(); ++i) {
-
 			dataIds.add(jsonArray.getInt(i));
 		}
-		dataIds.add(Integer.parseInt(ti.getInputsAsMap().get("source_data")));
 		
 		downloadDatasets(openml, new ArrayList<Integer>(dataIds));
 	}
