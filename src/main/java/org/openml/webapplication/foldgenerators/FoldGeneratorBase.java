@@ -28,12 +28,14 @@ public abstract class FoldGeneratorBase implements FoldGeneratorInterface {
 		
 		if (ArrayUtils.contains(Settings.LEARNING_CURVE_TASK_IDS, evaluationMethod.getTtid())) {
 			splitsSize = getSplitsSizeLearningCurve(evaluationMethod, dataset.numInstances());
-			arffMapping = new ArffMapping(true);
-			// TODO: check whether evaluation method has sample based
+			arffMapping = new ArffMapping(true, null, null);
+		} else if (ArrayUtils.contains(Settings.MULTITASK_TASK_IDS, evaluationMethod.getTtid())) {
+			splitsSize = getSplitsSizeVanilla(evaluationMethod, dataset.numInstances());
+			// note that originally, the task id attribute was index 0, now at 1
+			arffMapping = new ArffMapping(false, this.dataset, 1);
 		} else {
 			splitsSize = getSplitsSizeVanilla(evaluationMethod, dataset.numInstances());
-			arffMapping = new ArffMapping(false);
-			// TODO: check whether evaluation method has sample based
+			arffMapping = new ArffMapping(false, null, null);
 		}
 		
 		if (evaluationMethod.getType() == EstimationProcedureType.HOLDOUT_ORDERED) {

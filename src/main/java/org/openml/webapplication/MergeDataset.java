@@ -9,9 +9,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONArray;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.TaskInputs;
+import org.openml.webapplication.settings.Settings;
 import org.openml.weka.io.OpenmlWekaConnector;
 
 import weka.core.Attribute;
@@ -33,8 +35,8 @@ public class MergeDataset {
 		this.datasets = new TreeMap<String, Instances>();
 		TaskInputs ti = openml.taskInputs(taskId);
 		
-		if (ti.getTask_type_id() != 9) {
-			throw new Exception("Can only invoke this function on task type 9. ");
+		if (ArrayUtils.contains(Settings.LEARNING_CURVE_TASK_IDS, ti.getTask_type_id())) {
+			throw new Exception("Can only invoke this function on task type MultiTask. ");
 		}
 		JSONArray jsonArray = new JSONArray(ti.getInputsAsMap().get("source_data_list"));
 		Set<Integer> dataIds = new TreeSet<Integer>();
@@ -91,7 +93,7 @@ public class MergeDataset {
 			throw new Exception("Attribute Set does not agree!");
 		}
 		Instances first = this.datasets.values().iterator().next();
-		String name = "merged" + datasets.keySet();
+		String name = "merged" + datasets.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").replace(",", "_");
 		// go through string representation
 		StringBuilder sb = new StringBuilder();
 		sb.append("@relation '" + name + "'\n\n");

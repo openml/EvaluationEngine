@@ -19,10 +19,13 @@
  */
 package org.openml.webapplication.generatefolds;
 
+import java.io.File;
 import java.io.FileReader;
+import java.net.URL;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.openml.apiconnector.algorithms.TaskInformation;
+import org.openml.apiconnector.io.HttpCacheController;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EstimationProcedure;
@@ -47,12 +50,24 @@ public class GenerateFolds {
 		Task task = ac.taskGet(taskId);
 		ttid = task.getTask_type_id();
 		int epId = TaskInformation.getEstimationProcedure(task).getId();
-		int did = TaskInformation.getSourceData(task).getData_set_id();
-		DataSetDescription dsd = ac.dataGet(did);
-		Instances dataset = new Instances(new FileReader(ac.datasetGet(dsd)));
-		InstancesHelper.setTargetAttribute(dataset, TaskInformation.getSourceData(task).getTarget_feature());
+		Instances dataset;
+		String splitsName;
+		if (ArrayUtils.contains(Settings.MULTITASK_TASK_IDS, ttid)) {
+			int did = TaskInformation.getSourceData(task).getData_set_id();
+			DataSetDescription dsd = ac.dataGet(did);
+			dataset = new Instances(new FileReader(ac.datasetGet(dsd)));
+			InstancesHelper.setTargetAttribute(dataset, TaskInformation.getSourceData(task).getTarget_feature());
+			splitsName = dsd.getName() + "_splits";
+		} else {
+			// multi task setting, download merged dataset
+			URL apiMerged = new URL(ac.getBaseUrl() + "/api_splits/merge_datasets/" + taskId);
+			File fileMerged = HttpCacheController.getCachedFileFromUrl(apiMerged, "merged_data");
+			dataset = new Instances(new FileReader(fileMerged));
+			// stratefy on task id
+			dataset.setClassIndex(0); // TODO document that this is convention
+			splitsName = "multitask_splits";
+		}
 		EstimationProcedure evaluationMethod = ac.estimationProcedureGet(epId);
-		String splitsName = dsd.getName() + "_splits";
 		
 		switch (evaluationMethod.getType()) {
 			case HOLDOUT:

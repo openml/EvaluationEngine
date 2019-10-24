@@ -56,11 +56,11 @@ public class CrossValidationSplitsGenerator extends FoldGeneratorBase {
 				for (int s = 0; s < getNumberOfSamples(train.numInstances()); ++s) {
 					for (int i = 0; i < sampleSize(s, train.numInstances()); ++i) {
 						int rowid = (int) train.instance(i).value(0);
-						splits.add(arffMapping.createInstance(true, rowid, r, f, s));
+						splits.add(arffMapping.createInstanceWithSample(true, rowid, r, f, s));
 					}
 					for (int i = 0; i < test.numInstances(); ++i) {
 						int rowid = (int) test.instance(i).value(0);
-						splits.add(arffMapping.createInstance(false, rowid, r, f, s));
+						splits.add(arffMapping.createInstanceWithSample(false, rowid, r, f, s));
 					}
 				}
 			}
