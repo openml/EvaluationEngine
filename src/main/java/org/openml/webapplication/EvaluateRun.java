@@ -234,7 +234,7 @@ public class EvaluateRun {
 
 			Conversion.log("OK", "Process Run", "Run processed: " + receivedId);
 		} catch (ApiException e) {
-			Conversion.log("ERROR", "Process Run", "An error occured during API call: " + e.getMessage());
+			Conversion.log("ERROR", "Process Run", "Error code " + e.getCode() + "; An error occured during API call: " + e.getMessage());
 			RunEvaluation errorEvaluation = new RunEvaluation(runId, Settings.EVALUATION_ENGINE_ID);
 			errorEvaluation.setError(e.getMessage(), MAX_LENGTH_WARNING);
 			apiconnector.runEvaluate(errorEvaluation);

@@ -31,7 +31,6 @@ import org.openml.webapplication.evaluate.OpenMLEvaluation;
 import org.openml.webapplication.evaluate.TaskType;
 import org.openml.webapplication.models.JsonItem;
 
-import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.Utils;
 
@@ -108,7 +107,7 @@ public class Output {
 
 			m.put("precision",
 					new MetricScore(evaluator.weightedPrecision(), precision, (int) evaluator.numInstances()));
-			m.put("recall", new MetricScore(evaluator.weightedRecall(), recall, (int) evaluator.numInstances()));
+			m.put("weighted_recall", new MetricScore(evaluator.weightedRecall(), recall, (int) evaluator.numInstances()));
 			m.put("unweighted_recall", new MetricScore(evaluator.unweightedRecall(), recall, (int) evaluator.numInstances()));
 			m.put("f_measure", new MetricScore(evaluator.weightedFMeasure(), fMeasure, (int) evaluator.numInstances()));
 			if (Utils.isMissingValue(evaluator.weightedAreaUnderROC()) == false) {
