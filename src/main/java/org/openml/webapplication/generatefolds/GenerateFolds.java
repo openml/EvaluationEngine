@@ -52,7 +52,8 @@ public class GenerateFolds {
 		int epId = TaskInformation.getEstimationProcedure(task).getId();
 		Instances dataset;
 		String splitsName;
-		if (ArrayUtils.contains(Settings.MULTITASK_TASK_IDS, ttid)) {
+		if (!ArrayUtils.contains(Settings.MULTITASK_TASK_IDS, ttid)) {
+			// normal case, just download the dataset
 			int did = TaskInformation.getSourceData(task).getData_set_id();
 			DataSetDescription dsd = ac.dataGet(did);
 			dataset = new Instances(new FileReader(ac.datasetGet(dsd)));
