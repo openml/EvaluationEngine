@@ -31,6 +31,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.EstimationProcedure;
 import org.openml.apiconnector.xml.Task;
 import org.openml.webapplication.algorithm.InstancesHelper;
+import org.openml.webapplication.exceptions.LegacyWarning;
 import org.openml.webapplication.foldgenerators.CrossValidationSplitsGenerator;
 import org.openml.webapplication.foldgenerators.FoldGeneratorInterface;
 import org.openml.webapplication.foldgenerators.HoldoutOrderedSplitsGenerator;
@@ -86,6 +87,8 @@ public class GenerateFolds {
 			case TESTONTRAININGDATA:
 				foldGenerator = new TrainOnTestSplitsGenerator(dataset, evaluationMethod, splitsName);
 				break;
+			case CUSTOMHOLDOUT:
+				throw new LegacyWarning(501, "Custom Test splits no longer supported.");
 			default:
 				throw new RuntimeException("Illegal evaluationMethod (GenerateFolds::generateInstances)");
 		}

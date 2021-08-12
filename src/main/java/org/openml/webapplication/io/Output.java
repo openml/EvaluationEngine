@@ -139,8 +139,12 @@ public class Output {
 		}
 	}
 
-	public static String styleToJsonError(String value) {
-		return "{\"error\":\"" + value + "\"}" + "\n";
+	public static String styleToJsonError(Integer errorNo, String value) {
+		String errorNoStr = "";
+		if (errorNo != null) {
+			errorNoStr = ", \"errorNo\": \"" + errorNo + "\"}";
+		}
+		return "{\"error\":\"" + value + "\"" + errorNoStr + "\n";
 	}
 
 	public static String statusMessage(String status, String message) {
