@@ -3,6 +3,9 @@ package opg.openml.webapplication.evaluator;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 import org.openml.apiconnector.algorithms.Conversion;
@@ -10,7 +13,9 @@ import org.openml.apiconnector.settings.Constants;
 import org.openml.apiconnector.xml.DataFeature;
 import org.openml.apiconnector.xml.DataQuality;
 import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.webapplication.ProcessDataset;
+import org.openml.webapplication.features.ExtractFeatures;
 import org.openml.webapplication.settings.Settings;
 import org.openml.webapplication.testutils.DatasetFactory;
 
@@ -70,6 +75,33 @@ public class TestDatasetEvaluator extends BaseTestFramework {
 		Instances dataset = DatasetFactory.getXORNumericNoClass();
 		
 		processAndCheck(dsd, dataset);
+	}
+
+	@Test
+	public final void testCaseSensitiveFeatures() throws Exception {
+		Instances data = client_read_live.getArffFromUrl(1910507);
+		assertEquals("high", data.attribute(1).value(1));
+		assertEquals("High", data.attribute(1).value(2));
+		assertEquals("low", data.attribute(1).value(3));
+		assertEquals("Low", data.attribute(1).value(4));
+		
+		assertEquals("Low", data.instance(0).stringValue(1));
+		assertEquals("low", data.instance(154).stringValue(1));
+	}
+	
+
+	@Test
+	public final void testCaseSensitiveExtractor() throws Exception {
+		Instances data = client_read_live.getArffFromUrl(1910507);
+		List<Feature> features = ExtractFeatures.getFeatures(data, "Class");
+		List<String> featureNames = new ArrayList<String>(Arrays.asList(features.get(1).getNominalValues()));
+		assertTrue(featureNames.contains("low"));
+		assertTrue(featureNames.contains("Low"));
+		assertTrue(featureNames.contains("high"));
+		assertTrue(featureNames.contains("High"));
+		
+		assertTrue(xstream.toXML(features).indexOf("<oml:nominal_value>low</oml:nominal_value>") > 0);
+		assertTrue(xstream.toXML(features).indexOf("<oml:nominal_value>Low</oml:nominal_value>") > 0);
 	}
 
 }
