@@ -78,7 +78,7 @@ public class TestDatasetEvaluator extends BaseTestFramework {
 	}
 
 	@Test
-	public final void testCaseSensitiveFeatures() throws Exception {
+	public final void testCaseSensitiveFeaturesArffTextual() throws Exception {
 		Instances data = client_read_live.getArffFromUrl(1910507);
 		assertEquals("high", data.attribute(1).value(1));
 		assertEquals("High", data.attribute(1).value(2));
@@ -89,9 +89,8 @@ public class TestDatasetEvaluator extends BaseTestFramework {
 		assertEquals("low", data.instance(154).stringValue(1));
 	}
 	
-
 	@Test
-	public final void testCaseSensitiveExtractor() throws Exception {
+	public final void testCaseSensitiveExtractorTextual() throws Exception {
 		Instances data = client_read_live.getArffFromUrl(1910507);
 		List<Feature> features = ExtractFeatures.getFeatures(data, "Class");
 		List<String> featureNames = new ArrayList<String>(Arrays.asList(features.get(1).getNominalValues()));
@@ -102,6 +101,25 @@ public class TestDatasetEvaluator extends BaseTestFramework {
 		
 		assertTrue(xstream.toXML(features).indexOf("<oml:nominal_value>low</oml:nominal_value>") > 0);
 		assertTrue(xstream.toXML(features).indexOf("<oml:nominal_value>Low</oml:nominal_value>") > 0);
+	}
+	
+
+	@Test
+	public final void testCaseSensitiveExtractorOnTest() throws Exception {
+		DataSetDescription dsd = new DataSetDescription("test-case-sensitive", "test", "arff", "Class");
+		int did = client_write_test.dataUpload(dsd, new File("data/test/datasets/casesensitive.arff"));
+		DataSetDescription downloaded = client_read_test.dataGet(did);
+		Instances data = client_read_test.getArffFromUrl(downloaded.getFile_id());
+		List<Feature> features = ExtractFeatures.getFeatures(data, "Class");
+		DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
+		client_admin_test.dataFeaturesUpload(datafeature);
+		System.err.println(did);
+		DataFeature df = client_read_test.dataFeatures(did);
+		List<String> featureNames = new ArrayList<String>(Arrays.asList(df.getFeatureMap().get("V3").getNominalValues()));
+		assertTrue(featureNames.contains("low"));
+		assertTrue(featureNames.contains("Low"));
+		assertTrue(featureNames.contains("high"));
+		assertTrue(featureNames.contains("High"));
 	}
 
 }
