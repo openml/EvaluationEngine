@@ -42,7 +42,7 @@
     <dependency> <!-- for running tests on tasks and connector -->
       <groupId>org.openml</groupId>
       <artifactId>openmlweka</artifactId>
-      <version>0.9.7-SNAPSHOT</version>
+      <version>0.9.8-SNAPSHOT</version>
       <!-- <scope>test</scope> -->
     </dependency>
     
