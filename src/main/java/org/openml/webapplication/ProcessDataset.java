@@ -1,7 +1,5 @@
 package org.openml.webapplication;
 
-import java.util.List;
-
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.settings.Constants;
@@ -10,12 +8,14 @@ import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.DataUnprocessed;
 import org.openml.webapplication.features.CharacterizerFactory;
-import org.openml.webapplication.features.ExtractFeatures;
+import org.openml.webapplication.features.FeatureExtractor;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.settings.Settings;
 import org.openml.weka.io.OpenmlWekaConnector;
+import weka.core.converters.ArffLoader;
 
-import weka.core.Instances;
+import java.io.Reader;
+import java.util.List;
 
 public class ProcessDataset {
 
@@ -50,10 +50,11 @@ public class ProcessDataset {
 		
 		try {
 			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
-			Instances dataset = apiconnector.getDataset(dsd);
+			Reader reader = apiconnector.getDataset(dsd);
+			ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
-			List<Feature> features = ExtractFeatures.getFeatures(dataset, defaultTarget);
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
+			List<Feature> features = FeatureExtractor.getFeatures(dataset, defaultTarget);
+			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[0]));
 			int receivedId = apiconnector.dataFeaturesUpload(datafeature);
 			
 			if (dsd.getStatus().equals(Constants.DATA_STATUS_PREP)) {
@@ -71,10 +72,7 @@ public class ProcessDataset {
 				e.printStackTrace();
 				processDatasetWithError(did, e.getMessage());
 			}
-		} catch(Exception e) {
-			e.printStackTrace();
-			processDatasetWithError(did, e.getMessage());
-		} catch (OutOfMemoryError e) {
+		} catch(Exception | OutOfMemoryError e) {
 			e.printStackTrace();
 			processDatasetWithError(did, e.getMessage());
 		}

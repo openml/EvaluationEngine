@@ -49,7 +49,7 @@ public class ChallengeSets {
 		
 		// System.out.println(secondsInProgres + "," +trainAvailable  + "," +  testAvailable);
 		
-		dataset = apiconnector.getDataset(dsd);
+		dataset = new Instances(apiconnector.getDataset(dsd));
 		targetAttribute = dataset.attribute(ds.getTarget_feature());
 	}
 	

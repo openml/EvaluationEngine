@@ -2,7 +2,7 @@ package org.openml.webapplication.features;
 
 import org.junit.Test;
 import org.openml.apiconnector.xml.DataFeature;
-import weka.core.Instances;
+import weka.core.converters.ArffLoader;
 
 import java.io.FileReader;
 import java.io.Reader;
@@ -11,13 +11,13 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class TestExtractFeatures {
-    private static final double DELTA = 1e-6;
+    private static final double DELTA = 1e-9;
     @Test
     public final void testFeatureExtraction() throws Exception {
         String targetAttribute = "play";
-        //        Reader dataset = new FileReader("data/test/datasets/weather.arff");
-        Instances dataset = new Instances(new FileReader("data/test/datasets/weather.arff"));
-        List<DataFeature.Feature> features = ExtractFeatures.getFeatures(dataset, targetAttribute);
+        Reader reader = new FileReader("data/test/datasets/weather.arff");
+        ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
+        List<DataFeature.Feature> features = FeatureExtractor.getFeatures(dataset, targetAttribute);
 
         assertEquals(5, features.size());
 
