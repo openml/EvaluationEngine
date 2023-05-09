@@ -54,7 +54,7 @@ public class InstanceBased {
 		
 
 		DataSetDescription dsd = openml.dataGet(TaskInformation.getSourceData(currentTask).getData_set_id());
-		dataset = openml.getDataset(dsd);
+		dataset = new Instances(openml.getDataset(dsd));
 		
 		if (currentTask.getTask_type().equals("Supervised Data Stream Classification")) {
 			// simulate task splits file. 
@@ -76,7 +76,7 @@ public class InstanceBased {
 				task_splits.add(new DenseInstance(1.0, attValues));
 			}
 		} else {
-			task_splits = openml.getSplitsFromTask(currentTask);
+			task_splits = new Instances(openml.getSplitsFromTask(currentTask));
 		}
 			
 		for (Integer run_id : run_ids) {
@@ -89,7 +89,7 @@ public class InstanceBased {
 			for (Run.Data.File f : outputFiles) {
 				if (f.getName().equals("predictions")) {
 					found = true;
-					Instances runPredictions = openml.getArffFromUrl(f.getFileId());
+					Instances runPredictions = new Instances(openml.getArffFromUrl(f.getFileId()));
 					predictions.put(run_id,predictionsToHashMap(runPredictions));
 				}
 			}
