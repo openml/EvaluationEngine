@@ -42,14 +42,14 @@
     <dependency> <!-- for running tests on tasks and connector -->
       <groupId>org.openml</groupId>
       <artifactId>openmlweka</artifactId>
-      <version>0.9.7-SNAPSHOT</version>
+      <version>0.9.8-SNAPSHOT</version>
       <!-- <scope>test</scope> -->
     </dependency>
     
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.23</version>
+      <version>1.0.25-SNAPSHOT</version>
     </dependency>
     
     
@@ -80,8 +80,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.7.0</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>1.10</source>
+          <target>1.10</target>
         </configuration>
       </plugin>
     </plugins>
