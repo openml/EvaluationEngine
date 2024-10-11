@@ -106,7 +106,7 @@ public class EvaluateRun {
 		final Map<String, Run.Data.File> runFiles = runServer.getOutputFileAsMap();
 		final Data_set source_data = TaskInformation.getSourceData(task);
 		final Integer dataset_id = source_data.getLabeled_data_set_id() != null ? source_data.getLabeled_data_set_id() : source_data.getData_set_id();
-		final Integer task_id = runServer.getTask_id();
+		final int task_id = runServer.getTask_id();
 		
 		PredictionEvaluator predictionEvaluator;
 		RunEvaluation runevaluation = new RunEvaluation(runId, Settings.EVALUATION_ENGINE_ID);
@@ -247,7 +247,7 @@ public class EvaluateRun {
 	
 	private RunTrace traceToXML(int file_id, int task_id, int run_id) throws Exception {
 		RunTrace trace = new RunTrace(run_id);
-		Instances traceDataset = apiconnector.getArffFromUrl(file_id);
+		Instances traceDataset = new Instances(apiconnector.getArffFromUrl(file_id));
 		List<Integer> parameterIndexes = new ArrayList<Integer>();
 		
 		if (traceDataset.attribute("repeat") == null || 

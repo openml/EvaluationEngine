@@ -81,9 +81,9 @@ public class EvaluateBatchPredictions implements PredictionEvaluator {
 		this.taskType = taskType;
 		
 		// set all arff files needed for this operation.
-		dataset = openml.getDataset(dsd);
-		splits = openml.getSplitsFromTask(task);
-		predictions = openml.getArffFromUrl(predictionsFileId);
+		dataset = new Instances(openml.getDataset(dsd));
+		splits = new Instances(openml.getSplitsFromTask(task));
+		predictions = new Instances(openml.getArffFromUrl(predictionsFileId));
 		Conversion.log("OK", "EvaluateBatchPredictions", "predictions: " + predictionsFileId);
 		
 		Estimation_procedure estimationprocedure = TaskInformation.getEstimationProcedure(task);
