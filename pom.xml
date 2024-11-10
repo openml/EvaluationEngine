@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openml</groupId>
   <artifactId>EvaluationEngine</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.20241025-SNAPSHOT</version>
   <name>EvaluationEngine</name>
   <description>OpenML EvaluationEngine; processes datasets, generates splits and evaluates runs</description>
   <organization>
@@ -28,32 +28,36 @@
         <role>Assistant Professor</role>
       </roles>
     </developer>
-    </developers>
-  
+  </developers>
+
+  <properties>
+    <java.version>11</java.version>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
+
   
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency> <!-- for running tests on tasks and connector -->
       <groupId>org.openml</groupId>
       <artifactId>openmlweka</artifactId>
-      <version>0.9.9-SNAPSHOT</version>
-      <!-- <scope>test</scope> -->
+      <version>0.9.10</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.25-SNAPSHOT</version>
+      <version>1.0.30</version>
     </dependency>
-    
-    
-    
+
+
     <dependency> <!-- TODO JvR: remove/replace this one!-->
       <groupId>org.mod4j.org.apache.commons</groupId>
       <artifactId>cli</artifactId>
@@ -71,18 +75,45 @@
       <artifactId>weka-stable</artifactId>
       <version>3.8.2</version>
     </dependency>
-  
+
+    <dependency>
+      <groupId>com.github.fracpete</groupId>
+      <artifactId>multisearch-weka-package</artifactId>
+      <version>2021.2.17</version>
+    </dependency>
+
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.7.1</version>
         <configuration>
           <source>1.10</source>
           <target>1.10</target>
+          <archive>
+            <manifest>
+              <mainClass>org.openml.webapplication.Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
