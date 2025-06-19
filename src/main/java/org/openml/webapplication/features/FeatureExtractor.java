@@ -50,17 +50,18 @@ public class FeatureExtractor {
 	public static List<Feature> getFeatures(ArffLoader.ArffReader arffReader, String targetVariables) throws IOException {
 		final Instances structure = arffReader.getStructure();
 		final Set<String> targetAttributeNames = getTargetClasses(structure, targetVariables);
-		final boolean singleTargetClass = targetAttributeNames.size() == 1;
-		if (singleTargetClass) {
+		final boolean singleTarget = targetAttributeNames.size() == 1;
+		if (singleTarget) {
 			structure.setClass(structure.attribute(targetVariables));
 		}
-		final Integer numClasses = singleTargetClass ? structure.numClasses() : null;
+		final boolean singleNominalTarget = singleTarget && structure.classAttribute().isNominal();
+		final Integer numClasses = singleTarget ? structure.numClasses() : null;
 
 		final List<AttributeSummarizer> statistics = IntStream.range(0, structure.numAttributes())
 				.mapToObj(structure::attribute)
 				.map(attribute -> {
 					boolean isTarget = targetAttributeNames.contains(attribute.name());
-					return new AttributeSummarizer(attribute, isTarget, singleTargetClass, numClasses);
+					return new AttributeSummarizer(attribute, isTarget, singleNominalTarget, numClasses);
 				})
 				.collect(Collectors.toList());
 
