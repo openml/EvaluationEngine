@@ -38,12 +38,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToNominal;
 
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class FantailConnector {
 	private final Integer window_size = null; // TODO: make it work again
@@ -61,14 +56,27 @@ public class FantailConnector {
 			computeMetafeatures(dataset_id);
 		} else {
 			List<String> expectedQualities = CharacterizerFactory.getExpectedQualities(CHARACTERIZERS);
-			DataUnprocessed du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, expectedQualities, priorityTag);
-			while (du != null) {
+			Optional<DataUnprocessed> du = fetchUnprocessedQualities(mode, priorityTag, expectedQualities);
+
+			while (du.isPresent()) {
 				Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " as obtained from database. ");
-				computeMetafeatures(du.getDatasets()[0].getDid());
-				du = apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, expectedQualities, priorityTag);
+				computeMetafeatures(du.get().getDatasets()[0].getDid());
+				du = fetchUnprocessedQualities(mode, priorityTag, expectedQualities);
 			}
 			Conversion.log("OK", "Process Dataset", "No more datasets to process. ");
 		}
+	}
+
+	private Optional<DataUnprocessed> fetchUnprocessedQualities(String mode, String priorityTag, List<String> expectedQualities) throws Exception {
+		try {
+			return Optional.of(apiconnector.dataqualitiesUnprocessed(Settings.EVALUATION_ENGINE_ID, mode, false, expectedQualities, priorityTag));
+		} catch (ApiException e){
+			// No unprocessed qualities is perfectly normal behaviour, so ignoring these exceptions.
+			if(!e.getMessage().contains("No unprocessed")){
+				throw e;
+			}
+		}
+		return Optional.empty();
 	}
 
 	public void computeMetafeatures(int datasetId) throws Exception {
