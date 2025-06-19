@@ -57,15 +57,15 @@ public class AttributeSummarizer {
 	 *
 	 * @param attribute The Weka Attribute of which data should be summarized
 	 * @param isTarget Is this attribute a target variable
-	 * @param singleTarget Is there only one target variable
+	 * @param singleNominalTarget Is there only one target variable, which is nominal?
 	 * @param numTargetClasses Null if there is not a single target, otherwise the attribute.numClasses() of the target
 	 *                         attribute
 	 */
-	public AttributeSummarizer(Attribute attribute, boolean isTarget, boolean singleTarget, Integer numTargetClasses) {
+	public AttributeSummarizer(Attribute attribute, boolean isTarget, boolean singleNominalTarget, Integer numTargetClasses) {
 		this.attribute = attribute;
 		this.isTarget = isTarget;
 		this.missingCount = 0;
-		this.trackClassDistribution = attribute.isNominal() && singleTarget;
+		this.trackClassDistribution = singleNominalTarget && attribute.isNominal();
 		if (trackClassDistribution) {
 			classDistribution = new int[attribute.numValues()][numTargetClasses];
 		} else {

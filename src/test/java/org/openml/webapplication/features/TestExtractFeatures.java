@@ -61,4 +61,18 @@ public class TestExtractFeatures {
         assertEquals(81.64285714285714, feature.getMeanValue(), DELTA);
         assertEquals(10.285218242007035, feature.getStandardDeviation(), DELTA);
     }
+
+    /**
+     * The target is real, so no ClassDistribution should be summarized for any attribute.
+     */
+    @Test
+    public final void testFeatureExtractionWithRealTarget() throws Exception {
+        String targetAttribute = "num";
+        Reader reader = new FileReader("data/test/datasets/cleveland.arff");
+        ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
+        List<DataFeature.Feature> features = FeatureExtractor.getFeatures(dataset, targetAttribute);
+        for (DataFeature.Feature feature : features) {
+            assertEquals("[]", feature.getClassDistribution());
+        }
+    }
 }
