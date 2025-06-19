@@ -181,7 +181,10 @@ public class FantailConnector {
 		return qualities;
 	}
 
-	private static Set<Quality> datasetCharacteristics(Instances dataset, List<Characterizer> characterizers, Integer start, Integer interval_size, List<String> qualitiesAvailable, Instances fullDataset) throws Exception {
+	/**
+	 * Visible for testing
+	 */
+	public static Set<Quality> datasetCharacteristics(Instances dataset, List<Characterizer> characterizers, Integer start, Integer interval_size, List<String> qualitiesAvailable, Instances fullDataset) throws Exception {
 		Set<Quality> result = new TreeSet<>();
 		Instances intervalData;
 
