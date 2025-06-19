@@ -16,6 +16,7 @@ import weka.core.converters.ArffLoader;
 
 import java.io.Reader;
 import java.util.List;
+import java.util.Optional;
 
 public class ProcessDataset {
 
@@ -31,18 +32,30 @@ public class ProcessDataset {
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dataset_id + " on special request. ");
 			process(dataset_id);
 		} else {
-			DataUnprocessed du = connector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode);
-			
-			while(du != null) {
-				dataset_id = du.getDatasets()[0].getDid();
+			Optional<DataUnprocessed> du = fetchUnprocessed(mode);
+			while(du.isPresent()) {
+				dataset_id = du.get().getDatasets()[0].getDid();
 				Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " as obtained from database. ");
 				process( dataset_id );
-				du = connector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode);
+				du = fetchUnprocessed(mode);
 			}
 			Conversion.log("OK", "Process Dataset", "No more datasets to process. ");
 		}
 	}
-	
+
+	private Optional<DataUnprocessed> fetchUnprocessed(String mode) throws Exception {
+		try {
+			return Optional.of(apiconnector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode));
+		} catch (ApiException e){
+			// No unprocessed datasets is perfectly normal behaviour, so ignoring these exceptions.
+			if(!e.getMessage().contains("No unprocessed")){
+				throw e;
+			}
+		}
+		return Optional.empty();
+	}
+
+
 	public void process(Integer did) throws Exception {
 
 		DataSetDescription dsd = apiconnector.dataGet(did);
