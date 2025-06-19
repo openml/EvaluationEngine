@@ -1,7 +1,10 @@
 package org.openml.webapplication.fantail;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+import java.io.FileReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.openml.apiconnector.xml.DataQuality;
 import org.openml.apiconnector.xml.DataQuality.Quality;
 import org.openml.webapplication.fantail.dc.Characterizer;
+import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
+import org.openml.webapplication.fantail.dc.statistical.Statistical;
 import org.openml.webapplication.features.CharacterizerFactory;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.testutils.DatasetFactory;
@@ -75,4 +81,19 @@ public class TestFantailConnector {
 		assertEquals(CharacterizerFactory.getExpectedQualities(characterizers).size(), result.size());
 	}
 
+	/**
+	 * This dataset contains NaN values in the target. Auto correlation should not be computed.
+	 */
+	@Test
+	public final void testDatasetCharacteristicsWithNanTarget() throws Exception {
+		Reader reader = new FileReader("data/test/datasets/dataset_2188_autoHorse.arff");
+		Instances dataset = new Instances(reader);
+		dataset.setClassIndex(dataset.numAttributes() - 1);
+
+		Set<DataQuality.Quality> qualities = FantailConnector.datasetCharacteristics(
+				dataset, CharacterizerFactory.all(null), null, null, List.of(), null
+		);
+		Quality autoCorrelation = qualities.stream().filter(quality -> quality.getName().equals("AutoCorrelation")).findFirst().orElseThrow();
+		assertNull(autoCorrelation.getValue());
+	}
 }

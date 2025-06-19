@@ -85,19 +85,29 @@ public class SimpleMetaFeatures extends Characterizer {
 
 		// AutoCorrelation
 		if (dataset.classIndex() >= 0) {
-			double TimeBasedChanges = 0.0;
+			Double TimeBasedChanges = 0.0;
+			Double classCur = dataset.get(0).classValue();
+			Double classPrev;
 			for (int i = 1; i < dataset.numInstances(); i++) {
-				Instance currentInstance = dataset.get(i);
-				Instance previousInstance = dataset.get(i - 1);
+				classPrev = classCur;
+				classCur = dataset.get(i).classValue();
+				if(classCur.isNaN()){
+					TimeBasedChanges = null;
+					break;  // AutoCorrelation is undefined.
+				}
 				if (dataset.classAttribute().isNumeric()) {
-					TimeBasedChanges += Math.abs(previousInstance.classValue() - currentInstance.classValue());
+					TimeBasedChanges += Math.abs(classPrev - classCur);
 				} else if (dataset.classAttribute().isNominal()) {
-					TimeBasedChanges += (previousInstance.classValue() == currentInstance.classValue() ? 0 : 1);
+					TimeBasedChanges += (classPrev.equals(classCur) ? 0 : 1);
 				}
 			}
-			AutoCorrelation = (NumberOfInstances > 1 ? new Double(NumberOfInstances - 1 - TimeBasedChanges) / new Double(NumberOfInstances - 1.0) : 1.0);
-		} else {
-			AutoCorrelation = null;
+			if(TimeBasedChanges == null){
+				// AutoCorrelation is undefined if any target value is NaN
+			} else if (NumberOfInstances > 1){
+				AutoCorrelation = (NumberOfInstances - 1 - TimeBasedChanges) / (NumberOfInstances - 1.0);
+			} else {
+				AutoCorrelation = 1.0;
+			}
 		}
 		
 		// Class properties
