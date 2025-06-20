@@ -2,6 +2,7 @@ package org.openml.webapplication.features;
 
 import org.junit.Test;
 import org.openml.apiconnector.xml.DataFeature;
+import org.openml.apiconnector.xml.DataQuality;
 import weka.core.converters.ArffLoader;
 
 import java.io.FileReader;
@@ -74,5 +75,16 @@ public class TestExtractFeatures {
         for (DataFeature.Feature feature : features) {
             assertEquals("[]", feature.getClassDistribution());
         }
+    }
+
+    @Test
+    public final void testFeatureExtractionWithCompletelyNaNFeatures() throws Exception {
+        String targetAttribute = "Class";
+        Reader reader = new FileReader("data/test/datasets/sick.arff");
+        ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
+        List<DataFeature.Feature> features = FeatureExtractor.getFeatures(dataset, targetAttribute);
+
+        DataFeature.Feature tbg = features.stream().filter(feature -> feature.getName().equals("TBG")).findFirst().orElseThrow();
+        assertNull(tbg.getMeanValue());  // This raised an error before, because it divided by zero
     }
 }
