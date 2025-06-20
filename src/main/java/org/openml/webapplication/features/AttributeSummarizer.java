@@ -132,7 +132,7 @@ public class AttributeSummarizer {
 				totalSumSquared = totalSumSquared.add(new BigDecimal(value * value).multiply(BigDecimal.valueOf(count)));
 			}
 		}
-		if(doCalculateStatistics){
+		if(doCalculateStatistics && nObservations > 1){
 			mean = totalSum.divide(new BigDecimal(nObservations), PRECISION, ROUNDING_MODE ).doubleValue();
 			BigDecimal obs = new BigDecimal(nObservations);
 			stdev = Math.sqrt(
