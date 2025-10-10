@@ -53,9 +53,9 @@ public class EvaluateSurvivalAnalysisPredictions implements PredictionEvaluator 
 		// set all arff files needed for this operation. 
 		int did = TaskInformation.getSourceData(task).getData_set_id();
 		DataSetDescription dsd = openml.dataGet(did);
-		dataset 	= openml.getDataset(dsd);
-		predictions = openml.getSplitsFromTask(task); 
-		splits 		= openml.getArffFromUrl(run.getOutputFileAsMap().get("predictions").getFileId());
+		dataset 	= new Instances(openml.getDataset(dsd));
+		predictions = new Instances(openml.getSplitsFromTask(task));
+		splits 		= new Instances(openml.getArffFromUrl(run.getOutputFileAsMap().get("predictions").getFileId()));
 		
 		// initiate a class that will help us with checking the prediction count. 
 		predictionCounter = new FoldsPredictionCounter(splits);

@@ -50,7 +50,7 @@ public class MergeDataset {
 	public void downloadDatasets(OpenmlWekaConnector openml, List<Integer> datasetIds) throws Exception {
 		for (Integer datasetId : datasetIds) {
 			DataSetDescription dsd = openml.dataGet(datasetId);
-			Instances dataset = openml.getArffFromUrl(dsd.getFile_id());
+			Instances dataset = new Instances(openml.getArffFromUrl(dsd.getFile_id()));
 			List<String> taskIdValues = new ArrayList<String>();
 			taskIdValues.add(datasetId + "");
 			Attribute taskId = new Attribute("openml-dataset-id", taskIdValues);
