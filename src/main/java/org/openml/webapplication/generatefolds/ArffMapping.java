@@ -24,13 +24,21 @@ import java.util.ArrayList;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
+import weka.core.Instances;
 
 public class ArffMapping {
+	
+	private final ArrayList<Attribute> attributes;
+	
+	private final Instances dataset;
+	private final boolean useSamples;
+	private final boolean useTaskId;
 
-	ArrayList<Attribute> attributes;
-
-	public ArffMapping(boolean use_samples) {
+	public ArffMapping(boolean useSamples, Instances dataset, Integer taskIdIdx) {
 		attributes = new ArrayList<Attribute>();
+		this.useSamples = useSamples;
+		this.useTaskId = taskIdIdx != null;
+		this.dataset = dataset;
 
 		ArrayList<String> att_type_values = new ArrayList<String>();
 		att_type_values.add("TRAIN");
@@ -46,9 +54,13 @@ public class ArffMapping {
 		attributes.add(repeat);
 		attributes.add(fold);
 
-		if (use_samples) {
+		if (useSamples) {
 			Attribute sample = new Attribute("sample");
 			attributes.add(sample);
+		}
+		
+		if (taskIdIdx != null) {
+			attributes.add(dataset.attribute(taskIdIdx));
 		}
 	}
 
@@ -56,17 +68,28 @@ public class ArffMapping {
 		return attributes;
 	}
 
-	public Instance createInstance(boolean train, int rowid, int repeat, int fold) {
-		Instance instance = new DenseInstance(4);
+	public Instance createInstance(boolean train, int rowid, int repeat, int fold) throws Exception {
+		if (useSamples) {
+			throw new Exception("can not use this create instance fn");
+		}
+		int size = this.useTaskId ? 5 : 4;
+		Instance instance = new DenseInstance(size);
 		instance.setValue(attributes.get(0), train ? 0.0 : 1.0);
 		instance.setValue(attributes.get(1), rowid);
 		instance.setValue(attributes.get(2), repeat);
 		instance.setValue(attributes.get(3), fold);
+		if (this.useTaskId) {
+			// note that class value is task id
+			instance.setValue(attributes.get(4), this.dataset.get(rowid).classValue());
+		}
 
 		return instance;
 	}
 
-	public Instance createInstance(boolean train, int rowid, int repeat, int fold, int sample) {
+	public Instance createInstanceWithSample(boolean train, int rowid, int repeat, int fold, int sample) throws Exception  {
+		if (!useSamples || useTaskId) {
+			throw new Exception("can not use this create instance fn");
+		}
 		Instance instance = new DenseInstance(5);
 		instance.setValue(attributes.get(0), train ? 0.0 : 1.0);
 		instance.setValue(attributes.get(1), rowid);
@@ -76,5 +99,4 @@ public class ArffMapping {
 
 		return instance;
 	}
-
 }

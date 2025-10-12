@@ -44,7 +44,6 @@ import org.openml.webapplication.algorithm.InstancesHelper;
 import org.openml.webapplication.io.Output;
 import org.openml.webapplication.predictionCounter.PredictionCounter;
 
-import weka.classifiers.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
@@ -108,7 +107,7 @@ public class EvaluateStreamChallenge implements PredictionEvaluator {
 	
 	private void doEvaluation( ) throws Exception {
 		// set global evaluation
-		Evaluation globalEvaluator = new Evaluation(datasetStructure);
+		OpenMLEvaluation globalEvaluator = new OpenMLEvaluation(datasetStructure);
 		
 		Set<Integer> latePredictions = new HashSet<Integer>();
 		int prevRowId = -1;

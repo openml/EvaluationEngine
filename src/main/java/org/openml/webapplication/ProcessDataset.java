@@ -66,15 +66,22 @@ public class ProcessDataset {
 			Reader reader = apiconnector.getDataset(dsd);
 			ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
+
 			List<Feature> features = FeatureExtractor.getFeatures(dataset, defaultTarget);
-			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[0]));
-			int receivedId = apiconnector.dataFeaturesUpload(datafeature);
-			
+			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
+
+			try {
+				apiconnector.dataFeaturesUpload(datafeature);
+			} catch(ApiException ae) {
+				if (ae.getCode() != 441) {
+					throw ae;
+				}
+			}
 			if (dsd.getStatus().equals(Constants.DATA_STATUS_PREP)) {
 				apiconnector.dataStatusUpdate(did, Constants.DATA_STATUS_ACTIVE);
 			}
 			
-			Conversion.log( "OK", "Process Dataset", "Processing dataset " + receivedId + " - obtaining basic qualities. " );
+			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dsd.getId() + " - obtaining basic qualities. " );
 			fantail.computeMetafeatures(did);
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
 		} catch(ApiException e) {
