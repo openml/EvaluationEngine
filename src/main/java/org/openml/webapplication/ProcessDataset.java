@@ -1,7 +1,5 @@
 package org.openml.webapplication;
 
-import java.util.List;
-
 import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.io.ApiException;
 import org.openml.apiconnector.settings.Constants;
@@ -10,12 +8,15 @@ import org.openml.apiconnector.xml.DataFeature.Feature;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.DataUnprocessed;
 import org.openml.webapplication.features.CharacterizerFactory;
-import org.openml.webapplication.features.ExtractFeatures;
+import org.openml.webapplication.features.FeatureExtractor;
 import org.openml.webapplication.features.FantailConnector;
 import org.openml.webapplication.settings.Settings;
 import org.openml.weka.io.OpenmlWekaConnector;
+import weka.core.converters.ArffLoader;
 
-import weka.core.Instances;
+import java.io.Reader;
+import java.util.List;
+import java.util.Optional;
 
 public class ProcessDataset {
 
@@ -31,18 +32,30 @@ public class ProcessDataset {
 			Conversion.log( "OK", "Process Dataset", "Processing dataset " + dataset_id + " on special request. ");
 			process(dataset_id);
 		} else {
-			DataUnprocessed du = connector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode);
-			
-			while(du != null) {
-				dataset_id = du.getDatasets()[0].getDid();
+			Optional<DataUnprocessed> du = fetchUnprocessed(mode);
+			while(du.isPresent()) {
+				dataset_id = du.get().getDatasets()[0].getDid();
 				Conversion.log("OK", "Process Dataset", "Processing dataset " + dataset_id + " as obtained from database. ");
 				process( dataset_id );
-				du = connector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode);
+				du = fetchUnprocessed(mode);
 			}
 			Conversion.log("OK", "Process Dataset", "No more datasets to process. ");
 		}
 	}
-	
+
+	private Optional<DataUnprocessed> fetchUnprocessed(String mode) throws Exception {
+		try {
+			return Optional.of(apiconnector.dataUnprocessed(Settings.EVALUATION_ENGINE_ID, mode));
+		} catch (ApiException e){
+			// No unprocessed datasets is perfectly normal behaviour, so ignoring these exceptions.
+			if(!e.getMessage().contains("No unprocessed")){
+				throw e;
+			}
+		}
+		return Optional.empty();
+	}
+
+
 	public void process(Integer did) throws Exception {
 
 		DataSetDescription dsd = apiconnector.dataGet(did);
@@ -50,11 +63,13 @@ public class ProcessDataset {
 		
 		try {
 			FantailConnector fantail = new FantailConnector(apiconnector, CharacterizerFactory.simple());
-			Instances dataset = apiconnector.getDataset(dsd);
+			Reader reader = apiconnector.getDataset(dsd);
+			ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
 			Conversion.log("OK", "Process Dataset", "Processing dataset " + did + " - obtaining features. ");
-			List<Feature> features = ExtractFeatures.getFeatures(dataset, defaultTarget);
+
+			List<Feature> features = FeatureExtractor.getFeatures(dataset, defaultTarget);
 			DataFeature datafeature = new DataFeature(did, Settings.EVALUATION_ENGINE_ID, features.toArray(new Feature[features.size()]));
-			
+
 			try {
 				apiconnector.dataFeaturesUpload(datafeature);
 			} catch(ApiException ae) {
@@ -70,12 +85,14 @@ public class ProcessDataset {
 			fantail.computeMetafeatures(did);
 			Conversion.log("OK", "Process Dataset", "Dataset " + did + " - Processed successfully. ");
 		} catch(ApiException e) {
-			e.printStackTrace();
-			processDatasetWithError(did, e.getMessage());
-		} catch(Exception e) {
-			e.printStackTrace();
-			processDatasetWithError(did, e.getMessage());
-		} catch (OutOfMemoryError e) {
+			if (e.getCode() == 431) {
+				// dataset already processed
+				Conversion.log("Notice", "Process Dataset", e.getMessage());
+			} else {
+				e.printStackTrace();
+				processDatasetWithError(did, e.getMessage());
+			}
+		} catch(Exception | OutOfMemoryError e) {
 			e.printStackTrace();
 			processDatasetWithError(did, e.getMessage());
 		}

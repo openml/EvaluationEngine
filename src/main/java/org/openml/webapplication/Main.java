@@ -28,6 +28,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
+import org.openml.apiconnector.algorithms.Conversion;
 import org.openml.apiconnector.settings.Config;
 import org.openml.apiconnector.settings.Settings;
 import org.openml.webapplication.exceptions.LegacyWarning;
@@ -54,7 +55,7 @@ public class Main {
 		options.addOption("id", true, "The id of the dataset/run used");
 		options.addOption("u", true, "The user id");
 		options.addOption("config", true, "The config string describing the settings for API interaction");
-		options.addOption("f", true, "The function to invole");
+		options.addOption("f", true, "The function to invoke");
 		options.addOption("o", true, "The output file / offset");
 		options.addOption("r", true, "The run id");
 		options.addOption("reverse", false, "whether to start evaluating last runs");
@@ -161,7 +162,7 @@ public class Main {
 
 						aw.toStdout(null);
 					} else {
-						System.out.println(Output.styleToJsonError(null, "Missing arguments for function 'different_predictions'. Need r (run ids, comma separated) and t (task_id)"));
+						Conversion.log("Warning", "all_wrong", Output.styleToJsonError("Missing arguments for function 'all_wrong'. Need r (run ids, comma separated) and t (task_id)") );
 					}
 
 				} else if (function.equals("different_predictions")) {
@@ -182,7 +183,7 @@ public class Main {
 
 						aw.toStdout(leadingComments);
 					} else {
-						System.out.println(Output.styleToJsonError(null, "Missing arguments for function 'all_wrong'. Need r (run ids, comma separated) and t (task_id)"));
+						Conversion.log("Warning", "different_predictions", Output.styleToJsonError("Missing arguments for function 'different_predictions'. Need r (run ids, comma separated) and t (task_id)") );
 					}
 				} else if (function.equals("challenge")) {
 					Integer task_id = Integer.parseInt(cli.getOptionValue("t"));
@@ -206,18 +207,18 @@ public class Main {
 					}
 
 				} else {
-					System.out.println(Output.styleToJsonError(null, "call to unknown function: " + function));
+					Conversion.log("Error", "Main", Output.styleToJsonError("call to unknown function: " + function) );
 				}
 			} else {
-				System.out.println(Output.styleToJsonError(null, "No function specified. "));
+				Conversion.log("Error", "Main", Output.styleToJsonError("No function specified. ") );
 			}
 		} catch (LegacyWarning e) {
 			// exit status 0 to prevent mail
-			System.out.println(Output.styleToJsonError(e.getErrorNo(), e.getMessage()));
+			System.out.println(Output.styleToJsonError(e.getMessage()));
 			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println(Output.styleToJsonError(null, e.getMessage()));
+			Conversion.log("Error", "Main", Output.styleToJsonError(e.getMessage() ));
 			System.exit(1);
 		}
 

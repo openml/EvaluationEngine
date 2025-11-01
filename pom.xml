@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.openml</groupId>
   <artifactId>EvaluationEngine</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <name>EvaluationEngine</name>
   <description>OpenML EvaluationEngine; processes datasets, generates splits and evaluates runs</description>
   <organization>
@@ -28,84 +28,35 @@
         <role>Assistant Professor</role>
       </roles>
     </developer>
-    </developers>
-  <!-- this refers to the following file: 
-       https://github.com/sonatype/oss-parents/blob/master/oss-parent/pom.xml
-  -->
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
+  </developers>
 
-  <scm>
-    <connection>scm:git:https://github.com/openml/java</connection>
-    <developerConnection>scm:git:https://github.com/openml/EvaluationEngine</developerConnection>
-    <url>https://github.com/openml/EvaluationEngine</url>
-    <tag>EvaluationEngine-0.1.0</tag>
-  </scm>
+  <properties>
+    <java.version>11</java.version>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
 
-  <profiles>
-    <profile>
-      <id>release-sign-artifacts</id>
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <!-- used for skipping tests -->
-      <id>no-tests</id>
-      <properties>
-        <skipTests>true</skipTests>
-      </properties>
-    </profile>
-  </profiles>
-  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency> <!-- for running tests on tasks and connector -->
       <groupId>org.openml</groupId>
       <artifactId>openmlweka</artifactId>
-      <version>0.9.7</version>
-      <!-- <scope>test</scope> -->
+      <version>0.9.10</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.openml</groupId>
       <artifactId>apiconnector</artifactId>
-      <version>1.0.24</version>
+      <version>1.0.30</version>
     </dependency>
-    
-    
-    
+
+
     <dependency> <!-- TODO JvR: remove/replace this one!-->
       <groupId>org.mod4j.org.apache.commons</groupId>
       <artifactId>cli</artifactId>
@@ -123,14 +74,14 @@
       <artifactId>weka-stable</artifactId>
       <version>3.8.2</version>
     </dependency>
-  
+
+    <dependency>
+      <groupId>com.github.fracpete</groupId>
+      <artifactId>multisearch-weka-package</artifactId>
+      <version>2021.2.17</version>
+    </dependency>
+
   </dependencies>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  </properties>
-
   <build>
     <pluginManagement>
       <plugins>
@@ -139,8 +90,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.0.2</version>
           <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
+            <source>11</source>
+            <target>11</target>
           </configuration>
         </plugin>
 
@@ -173,22 +124,33 @@
 
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.7.1</version>
         <configuration>
-          <filesets>
-            <fileset>
-              <directory>.</directory>
-              <includes>
-                <include>**/*~</include>
-                <include>**/.attach_pid*</include>
-                <include>**/hs_err_pid*</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
+          <source>1.10</source>
+          <target>1.10</target>
+          <archive>
+            <manifest>
+              <mainClass>org.openml.webapplication.Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
