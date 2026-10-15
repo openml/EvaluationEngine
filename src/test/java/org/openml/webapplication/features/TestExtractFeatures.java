@@ -88,4 +88,13 @@ public class TestExtractFeatures {
         DataFeature.Feature tbg = features.stream().filter(feature -> feature.getName().equals("TBG")).findFirst().orElseThrow();
         assertNull(tbg.getMeanValue());  // This raised an error before, because it divided by zero
     }
+    @Test
+    public final void testFeatureExtractionWithoutDefaultTargetAttribute()  throws Exception {
+        Reader reader = new FileReader("data/test/datasets/sick.arff");
+        ArffLoader.ArffReader dataset = new ArffLoader.ArffReader(reader, 1000, false);
+        // the next row raised an error before, on "double classValue = instance.classValue();"
+        List<DataFeature.Feature> features = FeatureExtractor.getFeatures(dataset, null);
+        assertEquals(30, features.size());
+        assertEquals(0, features.stream().filter(DataFeature.Feature::getIs_target).count());
+    }
 }

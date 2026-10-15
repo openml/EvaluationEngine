@@ -67,7 +67,7 @@ public class FeatureExtractor {
 
 		Instance instance;
 		while((instance = arffReader.readInstance(structure)) != null) {
-			double classValue = instance.classValue();
+			Double classValue = singleTarget ? instance.classValue() : null;
 			for (int attrIdx = 0; attrIdx < statistics.size(); attrIdx++) {
 				AttributeSummarizer summarizer = statistics.get(attrIdx);
 				summarizer.addValue(instance.value(attrIdx), classValue);
