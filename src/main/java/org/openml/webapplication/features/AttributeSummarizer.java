@@ -80,13 +80,16 @@ public class AttributeSummarizer {
 	 * @param value The attribute value corresponding to this row
 	 * @param classValue The class corresponding to this row, or NaN
 	 */
-	public void addValue(double value, double classValue) {
+	public void addValue(double value, Double classValue) {
 		if (Utils.isMissingValue(value)) { 
 			missingCount += 1;
 			return;
 		}
 		if (trackClassDistribution) {
-			classDistribution[(int) value][(int) classValue] += 1;
+			if (classValue == null){
+				throw new RuntimeException("ClassValue needs to be provided if trackClassDistribution=true");
+			}
+			classDistribution[(int) value][(int) (double) classValue] += 1;
 		}
 		valueCounter.computeIfAbsent(value, v -> new AtomicInteger())
 				.getAndIncrement();
