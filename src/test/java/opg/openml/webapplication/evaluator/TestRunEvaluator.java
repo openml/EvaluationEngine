@@ -42,14 +42,19 @@ public class TestRunEvaluator extends BaseTestFramework {
 		assertTrue(runDownloaded.getOutputEvaluation().length > 5);
 		return result.getLeft();
 	}
-	
+
+	@Ignore(
+			"This test relies on MinIO on the test server, which is currently not working. TODO(JvdV): fix this"
+	)
 	@Test
 	public final void testEvaluateClassificationRun() throws Exception {
 		int taskId = 115;
 		Classifier classifier = new NaiveBayes();
 		testEvaluateRun(taskId, classifier);
 	}
-	
+	@Ignore(
+			"This test relies on MinIO on the test server, which is currently not working. TODO(JvdV): fix this"
+	)
 	@Test
 	public final void testEvaluateLeaveOneOutClassification() throws Exception {
 		int taskId = 238;
